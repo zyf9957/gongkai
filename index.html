@@ -580,14 +580,23 @@
                     return;
                 }
                 
+                // 确保CSV内容已生成
+                if (!csvContent) {
+                    csvContent = generateCSVContent(searchResults);
+                }
+                
                 downloadCSV(searchResults);
             });
             
             // 复制按钮点击事件
             copyBtn.addEventListener('click', function() {
+                // 确保CSV内容已生成
                 if (!csvContent) {
-                    showError('没有数据可复制');
-                    return;
+                    if (searchResults.length === 0) {
+                        showError('没有数据可复制');
+                        return;
+                    }
+                    csvContent = generateCSVContent(searchResults);
                 }
                 
                 copyToClipboard(csvContent);
@@ -595,9 +604,13 @@
             
             // 显示CSV数据按钮点击事件
             exportBtn.addEventListener('click', function() {
+                // 确保CSV内容已生成
                 if (!csvContent) {
-                    showError('没有数据可显示');
-                    return;
+                    if (searchResults.length === 0) {
+                        showError('没有数据可显示');
+                        return;
+                    }
+                    csvContent = generateCSVContent(searchResults);
                 }
                 
                 csvData.value = csvContent;
@@ -857,7 +870,7 @@
                         `"${poi.adname || ''}"`,
                         `"${poi.tel || ''}"`,
                         `"${poi.rating || ''}"`,
-                        `"${(poi.business ? poi.business.business_area : '').replace(/"/g, '""')}"`,
+                        `"${(poi.business ? poi.business.business_area || '' : '').replace(/"/g, '""')}"`,
                         `"${poi.cost || ''}"`,
                         `"${photoUrlsStr}"`
                     ];
@@ -870,12 +883,13 @@
             
             // 下载CSV文件
             function downloadCSV(pois) {
-                if (!csvContent) {
-                    csvContent = generateCSVContent(pois);
-                if (!csvContent) {
+                if (pois.length === 0) {
                     showError('没有数据可下载');
                     return;
                 }
+                
+                if (!csvContent) {
+                    csvContent = generateCSVContent(pois);
                 }
                 
                 // 创建下载链接
@@ -883,16 +897,30 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.setAttribute('href', url);
-                link.setAttribute('download', `周边搜索_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
+                
+                // 生成文件名，包含当前日期时间
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`;
+                link.setAttribute('download', `周边搜索_${dateStr}.csv`);
+                
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                
+                // 释放URL对象
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                
                 showSuccess('CSV文件已开始下载');
             }
             
             // 复制到剪贴板
             function copyToClipboard(text) {
+                if (!text || text.trim() === '') {
+                    showError('没有数据可复制');
+                    return;
+                }
+                
                 const textArea = document.createElement('textarea');
                 textArea.value = text;
                 document.body.appendChild(textArea);
