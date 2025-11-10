@@ -1065,6 +1065,7 @@
             };
             
             // 生成CSV内容 - 修复版：正确处理biz_ext字段
+            // 生成CSV内容 - 修复版：正确处理biz_ext字段和字符串类型
             function generateCSVContent(pois) {
                 // CSV标题行
                 const headers = ['名称', 'ID', '坐标', '类型', '分类编码', '地址', '省份', '城市', '区县', '电话', '评分', '人均消费', '距离(米)', '商圈', '图片链接1', '图片链接2', '图片链接3'];
@@ -1097,13 +1098,14 @@
                     const photoUrl2 = photos.length > 1 && photos[1].url ? photos[1].url : '';
                     const photoUrl3 = photos.length > 2 && photos[2].url ? photos[2].url : '';
                     
+                    // 确保所有值都是字符串再调用replace方法
                     const row = [
-                        `"${(poi.name || '').replace(/"/g, '""')}"`,
+                        `"${String(poi.name || '').replace(/"/g, '""')}"`,
                         `"${poi.id || ''}"`,
                         `"${poi.location || ''}"`,
-                        `"${(poi.type || '').replace(/"/g, '""')}"`,
+                        `"${String(poi.type || '').replace(/"/g, '""')}"`,
                         `"${poi.typecode || ''}"`,
-                        `"${(poi.address || '').replace(/"/g, '""')}"`,
+                        `"${String(poi.address || '').replace(/"/g, '""')}"`,
                         `"${poi.pname || ''}"`,
                         `"${poi.cityname || ''}"`,
                         `"${poi.adname || ''}"`,
