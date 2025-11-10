@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高德地图周边搜索工具</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <style>
         * {
             box-sizing: border-box;
@@ -20,7 +21,7 @@
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -58,7 +59,7 @@
         }
         
         .result-section {
-            flex: 1;
+            flex: 2;
             min-width: 300px;
             padding: 15px;
         }
@@ -115,7 +116,7 @@
             border-radius: 5px;
             padding: 15px;
             min-height: 200px;
-            max-height: 400px;
+            max-height: 60vh;
             overflow-y: auto;
             background: #f9f9f9;
         }
@@ -144,6 +145,11 @@
         .poi-item {
             border-bottom: 1px solid #eee;
             padding: 10px 0;
+            background: white;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .poi-item:last-child {
@@ -176,8 +182,80 @@
             font-size: 14px;
         }
         
+        .success {
+            color: #4caf50;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .location-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .location-group input {
+            flex: 2;
+        }
+        
+        .location-group button {
+            flex: 1;
+            background: #ff9800;
+        }
+        
+        .location-group button:hover {
+            background: #f57c00;
+        }
+        
+        .select2-container {
+            width: 100% !important;
+        }
+        
+        .verify-area {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .verify-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .verify-buttons button {
+            flex: 1;
+        }
+        
+        .confirm-btn {
+            background: #4caf50;
+        }
+        
+        .reject-btn {
+            background: #f44336;
+        }
+        
+        .request-delay {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .request-delay input {
+            width: 80px;
+        }
+        
         @media (max-width: 768px) {
             .content {
+                flex-direction: column;
+            }
+            
+            .location-group {
+                flex-direction: column;
+            }
+            
+            .verify-buttons {
                 flex-direction: column;
             }
         }
@@ -201,9 +279,25 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="address">地址转坐标</label>
+                    <div class="location-group">
+                        <input type="text" id="address" placeholder="输入地址，如：北京市朝阳区">
+                        <button id="convertBtn">获取坐标</button>
+                    </div>
+                    <div class="help-text">输入地址后点击"获取坐标"按钮</div>
+                </div>
+                
+                <div class="form-group">
                     <label for="location">中心点坐标 *</label>
                     <input type="text" id="location" placeholder="格式: 经度,纬度" value="116.473168,39.993015">
                     <div class="help-text">例如: 116.473168,39.993015 (经度在前，纬度在后)</div>
+                    <div id="verifyArea" class="verify-area" style="display: none;">
+                        <div id="verifyAddress"></div>
+                        <div class="verify-buttons">
+                            <button id="confirmBtn" class="confirm-btn">使用此坐标</button>
+                            <button id="rejectBtn" class="reject-btn">重新输入</button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -213,18 +307,32 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="types">地点类型</label>
-                    <select id="types">
-                        <option value="">-- 使用默认类型 --</option>
+                    <label for="types">地点类型 (可多选)</label>
+                    <select id="types" multiple="multiple">
+                        <option value="010000">汽车服务</option>
+                        <option value="020000">汽车销售</option>
+                        <option value="030000">汽车维修</option>
+                        <option value="040000">摩托车服务</option>
                         <option value="050000">餐饮服务</option>
                         <option value="060000">购物服务</option>
                         <option value="070000">生活服务</option>
+                        <option value="080000">体育休闲服务</option>
+                        <option value="090000">医疗保健服务</option>
+                        <option value="100000">住宿服务</option>
                         <option value="110000">风景名胜</option>
                         <option value="120000">商务住宅</option>
-                        <option value="130000">政府机构</option>
-                        <option value="150000">交通设施</option>
-                        <option value="160000">金融保险</option>
+                        <option value="130000">政府机构及社会团体</option>
+                        <option value="140000">科教文化服务</option>
+                        <option value="150000">交通设施服务</option>
+                        <option value="160000">金融保险服务</option>
                         <option value="170000">公司企业</option>
+                        <option value="180000">道路附属设施</option>
+                        <option value="190000">地名地址信息</option>
+                        <option value="200000">公共设施</option>
+                        <option value="220000">事件活动</option>
+                        <option value="970000">室内设施</option>
+                        <option value="980000">虚拟数据</option>
+                        <option value="990000">通行设施</option>
                     </select>
                     <div class="help-text">不选择则使用API默认类型(餐饮、生活服务、商务住宅)</div>
                 </div>
@@ -270,6 +378,15 @@
                     <div class="help-text">控制最大翻页数，每页最多25条</div>
                 </div>
                 
+                <div class="form-group">
+                    <label for="requestDelay">请求延时 (毫秒)</label>
+                    <div class="request-delay">
+                        <input type="number" id="requestDelay" value="500" min="100" max="5000">
+                        <span>毫秒 (建议500-1000)</span>
+                    </div>
+                    <div class="help-text">设置请求间隔，避免超出API限制</div>
+                </div>
+                
                 <button id="searchBtn">开始搜索</button>
             </div>
             
@@ -289,20 +406,71 @@
                 <button id="downloadBtn" class="download-btn" disabled>下载CSV文件</button>
                 
                 <div id="errorArea" class="error"></div>
+                <div id="successArea" class="success"></div>
             </div>
         </div>
     </div>
 
+    <!-- 引入 jQuery (Select2 依赖) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- 引入 Select2 脚本 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化Select2多选下拉框
+            $('#types').select2({
+                placeholder: "请选择地点类型 (不选则使用默认)",
+                allowClear: true,
+                width: '100%'
+            });
+            
             const searchBtn = document.getElementById('searchBtn');
             const downloadBtn = document.getElementById('downloadBtn');
+            const convertBtn = document.getElementById('convertBtn');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const rejectBtn = document.getElementById('rejectBtn');
             const resultArea = document.getElementById('resultArea');
             const status = document.getElementById('status');
             const progress = document.getElementById('progress');
             const errorArea = document.getElementById('errorArea');
+            const successArea = document.getElementById('successArea');
+            const verifyArea = document.getElementById('verifyArea');
+            const verifyAddress = document.getElementById('verifyAddress');
             
             let searchResults = [];
+            let currentConvertedLocation = '';
+            
+            // 地址转坐标按钮点击事件
+            convertBtn.addEventListener('click', function() {
+                const address = document.getElementById('address').value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
+                
+                if (!address) {
+                    showError('请输入地址');
+                    return;
+                }
+                
+                if (!apiKey) {
+                    showError('请输入高德API Key');
+                    return;
+                }
+                
+                convertAddressToCoordinates(address, apiKey);
+            });
+            
+            // 确认坐标按钮点击事件
+            confirmBtn.addEventListener('click', function() {
+                document.getElementById('location').value = currentConvertedLocation;
+                verifyArea.style.display = 'none';
+                showSuccess('坐标已确认并设置');
+            });
+            
+            // 拒绝坐标按钮点击事件
+            rejectBtn.addEventListener('click', function() {
+                verifyArea.style.display = 'none';
+                showError('请重新输入地址或坐标');
+            });
             
             // 搜索按钮点击事件
             searchBtn.addEventListener('click', function() {
@@ -320,6 +488,13 @@
                     return;
                 }
                 
+                // 验证坐标格式
+                const locationParts = location.split(',');
+                if (locationParts.length !== 2 || isNaN(locationParts[0]) || isNaN(locationParts[1])) {
+                    showError('坐标格式不正确，应为"经度,纬度"格式');
+                    return;
+                }
+                
                 // 重置状态
                 resetUI();
                 searchResults = [];
@@ -329,13 +504,14 @@
                     apiKey: apiKey,
                     location: location,
                     keywords: document.getElementById('keywords').value.trim(),
-                    types: document.getElementById('types').value,
+                    types: $('#types').val(), // 使用Select2获取多选值
                     radius: document.getElementById('radius').value,
                     region: document.getElementById('region').value.trim(),
                     cityLimit: document.getElementById('cityLimit').value,
                     sortRule: document.getElementById('sortRule').value,
                     pageSize: document.getElementById('pageSize').value,
-                    maxPages: document.getElementById('maxPages').value
+                    maxPages: document.getElementById('maxPages').value,
+                    requestDelay: document.getElementById('requestDelay').value
                 };
                 
                 // 执行搜索
@@ -352,6 +528,83 @@
                 downloadCSV(searchResults);
             });
             
+            // 地址转坐标函数
+            async function convertAddressToCoordinates(address, apiKey) {
+                convertBtn.disabled = true;
+                convertBtn.textContent = '转换中...';
+                showError('');
+                showSuccess('');
+                
+                try {
+                    const url = 'https://restapi.amap.com/v3/geocode/geo';
+                    const params = new URLSearchParams({
+                        key: apiKey,
+                        address: address,
+                        output: 'json'
+                    });
+                    
+                    const response = await fetch(`${url}?${params.toString()}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === '1' && result.geocodes && result.geocodes.length > 0) {
+                        const location = result.geocodes[0].location;
+                        currentConvertedLocation = location;
+                        
+                        // 验证坐标准确性
+                        await verifyCoordinates(location, apiKey);
+                        
+                    } else {
+                        throw new Error(result.info || '地址转换失败');
+                    }
+                } catch (error) {
+                    showError(`地址转换失败: ${error.message}`);
+                } finally {
+                    convertBtn.disabled = false;
+                    convertBtn.textContent = '获取坐标';
+                }
+            }
+            
+            // 验证坐标准确性
+            async function verifyCoordinates(location, apiKey) {
+                try {
+                    const url = 'https://restapi.amap.com/v3/geocode/regeo';
+                    const params = new URLSearchParams({
+                        key: apiKey,
+                        location: location,
+                        output: 'json',
+                        extensions: 'base'
+                    });
+                    
+                    const response = await fetch(`${url}?${params.toString()}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === '1' && result.regeocode) {
+                        const address = result.regeocode.formatted_address;
+                        verifyAddress.innerHTML = `
+                            <strong>坐标对应地址:</strong><br>
+                            ${address}<br><br>
+                            <strong>坐标:</strong> ${location}
+                        `;
+                        verifyArea.style.display = 'block';
+                        showSuccess('坐标已获取，请确认地址是否正确');
+                    } else {
+                        throw new Error('坐标验证失败');
+                    }
+                } catch (error) {
+                    showError(`坐标验证失败: ${error.message}`);
+                }
+            }
+            
             // 执行搜索
             async function performSearch(params) {
                 searchBtn.disabled = true;
@@ -361,6 +614,7 @@
                     const totalPages = parseInt(params.maxPages);
                     let currentPage = 1;
                     let totalCount = 0;
+                    let requestDelay = parseInt(params.requestDelay) || 500;
                     
                     while (currentPage <= totalPages) {
                         status.textContent = `正在获取第 ${currentPage}/${totalPages} 页数据...`;
@@ -368,9 +622,19 @@
                         
                         const pageData = await fetchPageData(params, currentPage);
                         
-                        if (!pageData || pageData.status !== '1') {
-                            showError(`第 ${currentPage} 页请求失败: ${pageData ? pageData.info : '未知错误'}`);
+                        if (!pageData) {
+                            showError(`第 ${currentPage} 页请求失败`);
                             break;
+                        }
+                        
+                        if (pageData.status !== '1') {
+                            if (pageData.info && pageData.info.includes('CUQPS_HAS_EXCEEDED_THE_LIMIT')) {
+                                showError('API请求频率超限，请增加请求延时或稍后再试');
+                                break;
+                            } else {
+                                showError(`第 ${currentPage} 页请求失败: ${pageData.info || '未知错误'}`);
+                                break;
+                            }
                         }
                         
                         // 如果是第一页，获取总数量
@@ -394,12 +658,13 @@
                         currentPage++;
                         
                         // 添加延时，避免请求过快
-                        await new Promise(resolve => setTimeout(resolve, 100));
+                        await new Promise(resolve => setTimeout(resolve, requestDelay));
                     }
                     
                     if (searchResults.length > 0) {
                         status.textContent = `数据获取完成! 实际获取 ${searchResults.length} 个POI`;
                         downloadBtn.disabled = false;
+                        showSuccess('搜索完成，可以下载CSV文件');
                     } else {
                         status.textContent = '未找到任何数据';
                     }
@@ -429,34 +694,44 @@
                 
                 // 添加可选参数
                 if (params.keywords) requestParams.append('keywords', params.keywords);
-                if (params.types) requestParams.append('types', params.types);
+                if (params.types && params.types.length > 0) requestParams.append('types', params.types.join('|'));
                 if (params.region) requestParams.append('region', params.region);
                 if (params.cityLimit) requestParams.append('city_limit', params.cityLimit);
                 
                 // 添加返回字段
-                requestParams.append('show_fields', 'business,tel,rating,photos');
+                requestParams.append('show_fields', 'business,tel,rating,photos,cost');
                 
-                const response = await fetch(`${url}?${requestParams.toString()}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP错误: ${response.status}`);
+                try {
+                    const response = await fetch(`${url}?${requestParams.toString()}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('请求失败:', error);
+                    return null;
                 }
-                
-                return await response.json();
             }
             
             // 更新结果显示
             function updateResultDisplay(pois) {
                 resultArea.innerHTML = '';
                 
-                pois.slice(0, 10).forEach((poi, index) => {
+                if (pois.length === 0) {
+                    resultArea.innerHTML = '<div class="no-data">未找到任何数据</div>';
+                    return;
+                }
+                
+                pois.forEach((poi, index) => {
                     const poiElement = document.createElement('div');
                     poiElement.className = 'poi-item';
                     
                     // 处理图片链接
                     const photos = poi.photos || [];
                     const photoUrls = photos.map(photo => photo.url).filter(url => url);
-                    const photoUrlsStr = photoUrls.length > 0 ? photoUrls.join('|') : '无';
+                    const photoUrlsStr = photoUrls.length > 0 ? photoUrls.join(' | ') : '无';
                     
                     poiElement.innerHTML = `
                         <div class="poi-name">${index + 1}. ${poi.name || '未知名称'}</div>
@@ -464,20 +739,14 @@
                             <div>地址: ${poi.address || '未知地址'}</div>
                             <div>电话: ${poi.tel || '无'}</div>
                             <div>评分: ${poi.rating || '无'}</div>
+                            <div>人均消费: ${poi.cost || '无'}</div>
                             <div>类型: ${poi.type || '未知类型'}</div>
+                            <div style="word-break: break-all;">图片链接: ${photoUrlsStr}</div>
                         </div>
                     `;
                     
                     resultArea.appendChild(poiElement);
                 });
-                
-                if (pois.length > 10) {
-                    const moreElement = document.createElement('div');
-                    moreElement.className = 'poi-item';
-                    moreElement.style.textAlign = 'center';
-                    moreElement.textContent = `... 还有 ${pois.length - 10} 条结果`;
-                    resultArea.appendChild(moreElement);
-                }
             }
             
             // 下载CSV文件
@@ -533,11 +802,19 @@
                 progress.style.width = '0%';
                 downloadBtn.disabled = true;
                 errorArea.textContent = '';
+                successArea.textContent = '';
             }
             
             // 显示错误信息
             function showError(message) {
                 errorArea.textContent = message;
+                successArea.textContent = '';
+            }
+            
+            // 显示成功信息
+            function showSuccess(message) {
+                successArea.textContent = message;
+                errorArea.textContent = '';
             }
         });
     </script>
