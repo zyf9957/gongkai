@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高德地图周边搜索工具 - 修复版</title>
+    <title>高德地图周边搜索工具 - 图片显示版</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <style>
         /* 样式部分保持不变 */
@@ -158,6 +158,7 @@
             padding: 10px;
             border-radius: 5px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
         }
         
         .poi-item:last-child {
@@ -173,6 +174,58 @@
             font-size: 13px;
             color: #666;
             margin-top: 5px;
+        }
+        
+        /* 新增图片相关样式 */
+        .poi-images {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .poi-image {
+            width: 100px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .poi-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
         }
         
         .download-btn {
@@ -300,6 +353,10 @@
             .export-options {
                 flex-direction: column;
             }
+            
+            .poi-images {
+                justify-content: center;
+            }
         }
         
         .debug-info {
@@ -312,19 +369,39 @@
             color: #856404;
             display: none;
         }
+        
+        .view-images-btn {
+            background: #607d8b;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 3px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .view-images-btn:hover {
+            background: #455a64;
+        }
     </style>
 </head>
 <body>
+    <!-- 图片模态框 -->
+    <div id="imageModal" class="image-modal">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
     <div class="container">
         <header>
-            <h1>高德地图周边搜索工具 - 修复版</h1>
-            <p class="description">修复了电话、评分和人均消费字段为空的问题</p>
+            <h1>高德地图周边搜索工具 - 图片显示版</h1>
+            <p class="description">修复了电话、评分和人均消费字段为空的问题，并支持图片显示</p>
         </header>
         
         <div class="content">
             <div class="form-section">
                 <h2>搜索参数设置</h2>
                 
+                <!-- 表单部分保持不变 -->
                 <div class="form-group">
                     <label for="apiKey">高德API Key *</label>
                     <input type="text" id="apiKey" placeholder="请输入您的高德API Key" value="">
@@ -503,6 +580,11 @@
             const debugInfo = document.getElementById('debugInfo');
             const debugContent = document.getElementById('debugContent');
             
+            // 获取图片模态框相关元素
+            const imageModal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const closeModal = document.querySelector('.close-modal');
+            
             let searchResults = [];
             let currentConvertedLocation = '';
             let csvContent = '';
@@ -512,6 +594,18 @@
             debugBtn.addEventListener('click', function() {
                 debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
                 updateDebugInfo('调试面板已切换显示状态');
+            });
+            
+            // 图片模态框事件
+            closeModal.addEventListener('click', function() {
+                imageModal.style.display = 'none';
+            });
+            
+            // 点击模态框背景关闭
+            imageModal.addEventListener('click', function(e) {
+                if (e.target === imageModal) {
+                    imageModal.style.display = 'none';
+                }
             });
             
             // 更新调试信息
@@ -890,7 +984,7 @@
                 }
             }
             
-            // 更新结果显示 - 修复版：正确处理biz_ext字段
+            // 更新结果显示 - 修复版：显示图片
             function updateResultDisplay(pois) {
                 resultArea.innerHTML = '';
                 
@@ -922,24 +1016,29 @@
                     const distance = poi.distance || '无';
                     const distanceText = distance === '无' ? distance : `${distance}米`;
                     
-                    // 处理图片链接，最多显示3个图片链接
+                    // 处理图片链接，显示图片缩略图
                     const photos = poi.photos || [];
-                    const maxPhotosToShow = 3;
-                    let photoUrlsText = '';
+                    let photoHtml = '';
                     
                     if (photos.length > 0) {
-                        photoUrlsText = '<div>图片链接:</div>';
-                        photos.slice(0, maxPhotosToShow).forEach((photo, imgIndex) => {
+                        photoHtml = '<div>图片:</div><div class="poi-images">';
+                        
+                        photos.forEach((photo, imgIndex) => {
                             if (photo.url) {
-                                photoUrlsText += `<div>图片链接${imgIndex + 1}: ${photo.url}</div>`;
+                                photoHtml += `
+                                    <img src="${photo.url}?width=100&height=75" 
+                                         alt="POI图片${imgIndex + 1}" 
+                                         class="poi-image"
+                                         onclick="showImageModal('${photo.url}')"
+                                         title="点击查看大图">
+                                `;
                             }
                         });
                         
-                        if (photos.length > maxPhotosToShow) {
-                            photoUrlsText += `<div>还有 ${photos.length - maxPhotosToShow} 个图片链接未显示</div>`;
+                        photoHtml += '</div>';
+                        if (photos.length > 6) {
+                            photoHtml += `<div class="help-text">共 ${photos.length} 张图片，更多图片请查看详情页</div>`;
                         }
-                    } else {
-                        photoUrlsText = '<div>图片链接: 无</div>';
                     }
                     
                     poiElement.innerHTML = `
@@ -951,13 +1050,19 @@
                             <div>人均消费: ${cost}</div>
                             <div>距离: ${distanceText}</div>
                             <div>类型: ${poi.type || '未知类型'}</div>
-                            ${photoUrlsText}
+                            ${photoHtml || '<div>图片: 无</div>'}
                         </div>
                     `;
                     
                     resultArea.appendChild(poiElement);
                 });
             }
+            
+            // 图片模态框显示函数
+            window.showImageModal = function(imageUrl) {
+                modalImage.src = imageUrl;
+                imageModal.style.display = 'flex';
+            };
             
             // 生成CSV内容 - 修复版：正确处理biz_ext字段
             function generateCSVContent(pois) {
