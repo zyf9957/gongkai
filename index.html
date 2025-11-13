@@ -6,7 +6,7 @@
     <title>高德地图周边搜索工具</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <style>
-        /* 样式部分保持不变 */
+        /* 样式部分保持不变，新增全屏样式 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -159,6 +159,18 @@
             border-radius: 5px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .poi-item:hover {
+            background: #f0f8ff;
+            transform: translateY(-2px);
+        }
+        
+        .poi-item.active {
+            background: #e3f2fd;
+            border-left: 4px solid #1e88e5;
         }
         
         .poi-item:last-child {
@@ -174,6 +186,34 @@
             font-size: 13px;
             color: #666;
             margin-top: 5px;
+        }
+        
+        /* 新增地图容器样式 */
+        .map-section {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 400px;
+            display: none;
+            position: relative;
+        }
+        
+        #mapContainer {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .map-controls button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 14px;
         }
         
         /* 新增图片相关样式 */
@@ -357,6 +397,10 @@
             .poi-images {
                 justify-content: center;
             }
+            
+            .map-controls {
+                flex-direction: column;
+            }
         }
         
         .debug-info {
@@ -382,6 +426,130 @@
         .view-images-btn:hover {
             background: #455a64;
         }
+        
+        /* 新增地图按钮样式 */
+        .map-toggle-btn {
+            background: #9c27b0;
+            margin-top: 10px;
+        }
+        
+        .map-toggle-btn:hover {
+            background: #7b1fa2;
+        }
+        
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .api-key-group input {
+            flex: 2;
+        }
+        
+        .api-key-group button {
+            flex: 1;
+            background: #9c27b0;
+        }
+        
+        .api-key-group button:hover {
+            background: #7b1fa2;
+        }
+        
+        /* 安全密钥样式 */
+        .security-key-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .security-key-group input {
+            flex: 1;
+        }
+        
+        /* 新增全屏样式 */
+        .fullscreen-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .map-section.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            margin: 0;
+            border-radius: 0;
+        }
+        
+        /* 地址搜索结果样式 */
+        .address-results {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .address-result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .address-result-item:hover {
+            background: #f0f8ff;
+        }
+        
+        .address-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .address-name {
+            font-weight: bold;
+            color: #1e88e5;
+        }
+        
+        .address-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* 定位按钮样式 */
+        .location-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .location-buttons button {
+            flex: 1;
+        }
+        
+        .current-location-btn {
+            background: #ff5722;
+        }
+        
+        .current-location-btn:hover {
+            background: #e64a19;
+        }
     </style>
 </head>
 <body>
@@ -394,17 +562,32 @@
     <div class="container">
         <header>
             <h1>高德地图周边搜索工具</h1>
-            <p class="description">探索周边好工具</p>
+            <p class="description">探索周边好工具 - 新增地图可视化功能</p>
         </header>
         
         <div class="content">
             <div class="form-section">
                 <h2>搜索参数设置</h2>
                 
-                <!-- 表单部分保持不变 -->
+                <!-- 新增地图API密钥和安全密钥输入 -->
                 <div class="form-group">
-                    <label for="apiKey">高德API Key *</label>
-                    <input type="text" id="apiKey" placeholder="请输入您的高德API Key" value="">
+                    <label for="mapApiKey">高德地图API Key (用于显示地图) *</label>
+                    <div class="api-key-group">
+                        <input type="text" id="mapApiKey" placeholder="请输入高德地图JavaScript API Key">
+                        <button id="loadMapBtn">加载地图</button>
+                    </div>
+                    <div class="help-text">请确保您有高德地图JavaScript API权限</div>
+                    
+                    <label for="securityKey" style="margin-top: 10px;">安全密钥 (Security Key)</label>
+                    <div class="security-key-group">
+                        <input type="text" id="securityKey" placeholder="请输入安全密钥 (可选)">
+                    </div>
+                    <div class="help-text">如果您的API Key配置了安全密钥，请在此输入</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="apiKey">高德Web服务API Key (用于搜索) *</label>
+                    <input type="text" id="apiKey" placeholder="请输入高德Web服务API Key" value="">
                     <div class="help-text">请确保您有高德地图Web服务API权限</div>
                 </div>
                 
@@ -415,6 +598,14 @@
                         <button id="convertBtn">获取坐标</button>
                     </div>
                     <div class="help-text">输入地址后点击"获取坐标"按钮</div>
+                    
+                    <!-- 新增定位当前位置按钮 -->
+                    <div class="location-buttons">
+                        <button id="currentLocationBtn" class="current-location-btn">定位当前位置</button>
+                    </div>
+                    
+                    <!-- 地址搜索结果列表 -->
+                    <div id="addressResults" class="address-results"></div>
                 </div>
                 
                 <div class="form-group">
@@ -500,6 +691,8 @@
                 </div>
                 
                 <button id="searchBtn">开始搜索</button>
+                <!-- 修改地图显示按钮，初始状态为禁用 -->
+                <button id="toggleMapBtn" class="map-toggle-btn" disabled>显示地图 (请先加载地图)</button>
                 <button id="debugBtn" style="background: #ff9800; margin-top: 5px;">调试信息</button>
             </div>
             
@@ -519,6 +712,17 @@
                 
                 <div class="result-area" id="resultArea">
                     <!-- 搜索结果将在这里显示 -->
+                </div>
+                
+                <!-- 新增地图容器和控件 -->
+                <div class="map-section" id="mapSection">
+                    <button id="fullscreenBtn" class="fullscreen-btn">全屏</button>
+                    <div id="mapContainer"></div>
+                    <div class="map-controls">
+                        <button id="clearMarkersBtn" class="clear-markers-btn">清除标记</button>
+                        <button id="fitViewBtn" class="fit-view-btn">调整视野</button>
+                        <button id="showCenterBtn" class="show-center-btn">显示中心点</button>
+                    </div>
                 </div>
                 
                 <div class="export-options">
@@ -580,6 +784,22 @@
             const debugInfo = document.getElementById('debugInfo');
             const debugContent = document.getElementById('debugContent');
             
+            // 新增地图相关元素
+            const mapSection = document.getElementById('mapSection');
+            const toggleMapBtn = document.getElementById('toggleMapBtn');
+            const clearMarkersBtn = document.getElementById('clearMarkersBtn');
+            const fitViewBtn = document.getElementById('fitViewBtn');
+            const showCenterBtn = document.getElementById('showCenterBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const loadMapBtn = document.getElementById('loadMapBtn');
+            const mapApiKeyInput = document.getElementById('mapApiKey');
+            const securityKeyInput = document.getElementById('securityKey');
+            
+            // 新增地址搜索相关元素
+            const addressInput = document.getElementById('address');
+            const addressResults = document.getElementById('addressResults');
+            const currentLocationBtn = document.getElementById('currentLocationBtn');
+            
             // 获取图片模态框相关元素
             const imageModal = document.getElementById('imageModal');
             const modalImage = document.getElementById('modalImage');
@@ -589,6 +809,16 @@
             let currentConvertedLocation = '';
             let csvContent = '';
             let isSearching = false;
+            
+            // 地图相关变量
+            let map = null;
+            let markers = [];
+            let infoWindows = [];
+            let markerCluster = null;
+            let isMapInitialized = false;
+            let isMapVisible = false;
+            let isMapLoaded = false;
+            let centerMarker = null; // 中心点标记
             
             // 添加调试按钮事件
             debugBtn.addEventListener('click', function() {
@@ -608,16 +838,133 @@
                 }
             });
             
-            // 更新调试信息
-            function updateDebugInfo(message) {
-                const timestamp = new Date().toLocaleTimeString();
-                debugContent.innerHTML += `[${timestamp}] ${message}<br>`;
-                debugContent.scrollTop = debugContent.scrollHeight;
+            // 加载地图按钮事件
+            loadMapBtn.addEventListener('click', function() {
+                const mapApiKey = mapApiKeyInput.value.trim();
+                const securityKey = securityKeyInput.value.trim();
+                
+                if (!mapApiKey) {
+                    showError('请输入高德地图API Key');
+                    return;
+                }
+                
+                loadMapBtn.disabled = true;
+                loadMapBtn.textContent = '加载中...';
+                
+                loadAmapScript(mapApiKey, securityKey);
+            });
+            
+            // 加载高德地图脚本
+            function loadAmapScript(apiKey, securityKey) {
+                if (window.AMap) {
+                    // 如果已经加载过，直接初始化
+                    initMap();
+                    return;
+                }
+                
+                // 构建API URL - 使用更稳定的版本
+                let apiUrl = `https://webapi.amap.com/maps?v=1.4.15&key=${apiKey}`;
+                
+                // 如果有安全密钥，添加到URL中
+                if (securityKey) {
+                    apiUrl += `&security=${securityKey}`;
+                }
+                
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = apiUrl;
+                script.onload = function() {
+                    updateDebugInfo('高德地图API加载成功');
+                    // 加载点聚合插件
+                    loadMarkerClusterer();
+                };
+                script.onerror = function() {
+                    showError('高德地图API加载失败，请检查API Key和安全密钥是否正确');
+                    updateDebugInfo('高德地图API加载失败');
+                    loadMapBtn.textContent = '加载地图';
+                    loadMapBtn.disabled = false;
+                };
+                document.head.appendChild(script);
             }
             
-            // 地址转坐标按钮点击事件
+            // 加载点聚合插件
+            function loadMarkerClusterer() {
+                // 检查是否已经加载了点聚合插件
+                if (window.AMap && window.AMap.MarkerClusterer) {
+                    updateDebugInfo('点聚合插件已加载');
+                    initMap();
+                    return;
+                }
+                
+                // 加载点聚合插件
+                const clusterScript = document.createElement('script');
+                clusterScript.type = 'text/javascript';
+                clusterScript.src = 'https://a.amap.com/jsapi_demos/static/demo-center/js/markerclusterer.js';
+                clusterScript.onload = function() {
+                    updateDebugInfo('点聚合插件加载成功');
+                    initMap();
+                    loadMapBtn.textContent = '重新加载地图';
+                    loadMapBtn.disabled = false;
+                };
+                clusterScript.onerror = function() {
+                    updateDebugInfo('点聚合插件加载失败，将使用普通标记');
+                    // 即使点聚合插件加载失败，也继续初始化地图
+                    initMap();
+                    loadMapBtn.textContent = '重新加载地图';
+                    loadMapBtn.disabled = false;
+                };
+                document.head.appendChild(clusterScript);
+            }
+            
+            // 地图控制按钮事件
+            toggleMapBtn.addEventListener('click', function() {
+                if (!isMapLoaded) {
+                    showError('请先加载地图');
+                    return;
+                }
+                
+                if (!isMapVisible) {
+                    // 显示地图
+                    if (!isMapInitialized) {
+                        initMap();
+                    }
+                    mapSection.style.display = 'block';
+                    isMapVisible = true;
+                    toggleMapBtn.textContent = '隐藏地图';
+                    updateDebugInfo('地图已显示');
+                } else {
+                    // 隐藏地图
+                    mapSection.style.display = 'none';
+                    isMapVisible = false;
+                    toggleMapBtn.textContent = '显示地图';
+                    updateDebugInfo('地图已隐藏');
+                }
+            });
+            
+            clearMarkersBtn.addEventListener('click', function() {
+                clearAllMarkers();
+                updateDebugInfo('所有地图标记已清除');
+            });
+            
+            fitViewBtn.addEventListener('click', function() {
+                if (isMapInitialized && map) {
+                    map.setFitView();
+                    updateDebugInfo('地图视野已调整');
+                }
+            });
+            
+            showCenterBtn.addEventListener('click', function() {
+                showCenterMarker();
+                updateDebugInfo('已显示中心点标记');
+            });
+            
+            fullscreenBtn.addEventListener('click', function() {
+                toggleFullscreen();
+            });
+            
+            // 地址转坐标按钮事件
             convertBtn.addEventListener('click', function() {
-                const address = document.getElementById('address').value.trim();
+                const address = addressInput.value.trim();
                 const apiKey = document.getElementById('apiKey').value.trim();
                 
                 if (!address) {
@@ -626,18 +973,483 @@
                 }
                 
                 if (!apiKey) {
-                    showError('请输入高德API Key');
+                    showError('请输入高德Web服务API Key');
                     return;
                 }
                 
                 convertAddressToCoordinates(address, apiKey);
             });
             
+            // 定位当前位置按钮事件
+            currentLocationBtn.addEventListener('click', function() {
+                getCurrentLocation();
+            });
+            
+            // 地址输入框输入事件 - 实现实时搜索
+            let searchTimeout;
+            addressInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const address = addressInput.value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
+                
+                if (address.length < 2 || !apiKey) {
+                    addressResults.style.display = 'none';
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    searchAddress(address, apiKey);
+                }, 500);
+            });
+            
+            // 更新调试信息
+            function updateDebugInfo(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                debugContent.innerHTML += `[${timestamp}] ${message}<br>`;
+                debugContent.scrollTop = debugContent.scrollHeight;
+            }
+            
+            // 初始化地图
+            function initMap() {
+                if (!window.AMap) {
+                    showError('高德地图API未加载，请先加载地图');
+                    updateDebugInfo('地图初始化失败：API未加载');
+                    return;
+                }
+                
+                const location = document.getElementById('location').value.trim();
+                let center = [116.473168, 39.993015]; // 默认中心点
+                
+                if (location) {
+                    const locationParts = location.split(',');
+                    if (locationParts.length === 2) {
+                        center = [parseFloat(locationParts[0]), parseFloat(locationParts[1])];
+                    }
+                }
+                
+                try {
+                    map = new AMap.Map('mapContainer', {
+                        zoom: 14,
+                        center: center,
+                        viewMode: '3D'
+                    });
+                    
+                    // 添加缩放控件
+                    map.addControl(new AMap.Zoom());
+                    
+                    // 添加比例尺控件
+                    map.addControl(new AMap.Scale());
+                    
+                    // 添加工具条控件
+                    map.addControl(new AMap.ToolBar());
+                    
+                    // 显示中心点标记
+                    showCenterMarker();
+                    
+                    isMapInitialized = true;
+                    isMapLoaded = true;
+                    toggleMapBtn.disabled = false;
+                    toggleMapBtn.textContent = '显示地图';
+                    showSuccess('地图加载成功，可以显示地图了');
+                    updateDebugInfo('地图初始化成功');
+                } catch (error) {
+                    console.error('地图初始化失败:', error);
+                    updateDebugInfo('地图初始化失败: ' + error.message);
+                    showError('地图初始化失败: ' + error.message);
+                    
+                    // 尝试使用更简单的方式初始化地图
+                    try {
+                        map = new AMap.Map('mapContainer', {
+                            zoom: 14,
+                            center: center
+                        });
+                        
+                        // 显示中心点标记
+                        showCenterMarker();
+                        
+                        isMapInitialized = true;
+                        isMapLoaded = true;
+                        toggleMapBtn.disabled = false;
+                        toggleMapBtn.textContent = '显示地图';
+                        showSuccess('地图加载成功 (简化模式)');
+                        updateDebugInfo('地图初始化成功 (简化模式)');
+                    } catch (simpleError) {
+                        console.error('简化地图初始化也失败:', simpleError);
+                        updateDebugInfo('简化地图初始化失败: ' + simpleError.message);
+                        showError('地图初始化失败，请检查API配置');
+                    }
+                }
+            }
+            
+            // 显示中心点标记
+            function showCenterMarker() {
+                if (!isMapInitialized || !map) return;
+                
+                // 清除之前的中心点标记
+                if (centerMarker) {
+                    map.remove(centerMarker);
+                }
+                
+                const location = document.getElementById('location').value.trim();
+                if (!location) return;
+                
+                const locationParts = location.split(',');
+                if (locationParts.length !== 2) return;
+                
+                const center = [parseFloat(locationParts[0]), parseFloat(locationParts[1])];
+                
+                // 创建中心点标记（使用不同颜色）
+                centerMarker = new AMap.Marker({
+                    position: center,
+                    title: '搜索中心点',
+                    content: `<div style="background-color: #ff5722; color: white; border-radius: 50%; width: 30px; height: 30px; text-align: center; line-height: 30px; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">中</div>`,
+                    offset: new AMap.Pixel(-15, -15),
+                    zIndex: 100 // 确保中心点标记在最上层
+                });
+                
+                // 创建信息窗口
+                const infoWindow = new AMap.InfoWindow({
+                    content: `<div style="padding: 10px;">
+                                <h3 style="margin: 0 0 10px; color: #ff5722;">搜索中心点</h3>
+                                <p><strong>坐标:</strong> ${location}</p>
+                              </div>`,
+                    offset: new AMap.Pixel(0, -30)
+                });
+                
+                // 标记点击事件
+                centerMarker.on('click', function() {
+                    infoWindow.open(map, centerMarker.getPosition());
+                });
+                
+                map.add(centerMarker);
+            }
+            
+            // 在地图上添加标记
+            function addMarkersToMap(pois) {
+                if (!isMapInitialized || !map) {
+                    updateDebugInfo('地图未初始化，无法添加标记');
+                    return;
+                }
+                
+                // 清除现有标记（保留中心点标记）
+                clearSearchMarkers();
+                
+                // 创建标记点
+                pois.forEach((poi, index) => {
+                    const location = poi.location.split(',').map(Number);
+                    if (location.length !== 2 || isNaN(location[0]) || isNaN(location[1])) {
+                        return; // 跳过无效坐标
+                    }
+                    
+                    // 创建标记
+                    const marker = new AMap.Marker({
+                        position: location,
+                        title: poi.name,
+                        content: `<div style="background-color: #1e88e5; color: white; border-radius: 50%; width: 30px; height: 30px; text-align: center; line-height: 30px;">${index + 1}</div>`,
+                        offset: new AMap.Pixel(-15, -15)
+                    });
+                    
+                    // 创建信息窗口内容
+                    let infoContent = `
+                        <div style="padding: 10px; max-width: 300px;">
+                            <h3 style="margin: 0 0 10px; color: #1e88e5;">${poi.name || '未知名称'}</h3>
+                            <p><strong>地址:</strong> ${poi.address || '未知地址'}</p>
+                            <p><strong>电话:</strong> ${poi.tel || '无'}</p>
+                            <p><strong>类型:</strong> ${poi.type || '未知类型'}</p>
+                            <p><strong>距离:</strong> ${poi.distance || '无'}米</p>
+                            <button onclick="focusOnPoi(${index})" style="background: #1e88e5; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">查看详情</button>
+                        </div>
+                    `;
+                    
+                    // 创建信息窗口
+                    const infoWindow = new AMap.InfoWindow({
+                        content: infoContent,
+                        offset: new AMap.Pixel(0, -30)
+                    });
+                    
+                    // 标记点击事件
+                    marker.on('click', function() {
+                        // 关闭所有信息窗口
+                        infoWindows.forEach(iw => iw.close());
+                        // 打开当前信息窗口
+                        infoWindow.open(map, marker.getPosition());
+                        // 高亮对应的列表项
+                        highlightListItem(index);
+                    });
+                    
+                    markers.push(marker);
+                    infoWindows.push(infoWindow);
+                });
+                
+                // 使用点聚合（如果可用）
+                if (markers.length > 0 && window.AMap && window.AMap.MarkerClusterer) {
+                    try {
+                        markerCluster = new AMap.MarkerClusterer(map, markers, {
+                            gridSize: 80,
+                            maxZoom: 18
+                        });
+                        updateDebugInfo(`已使用点聚合添加 ${markers.length} 个标记`);
+                    } catch (clusterError) {
+                        console.error('点聚合失败:', clusterError);
+                        updateDebugInfo('点聚合失败，使用普通标记: ' + clusterError.message);
+                        // 点聚合失败，直接添加标记到地图
+                        markers.forEach(marker => map.add(marker));
+                    }
+                } else if (markers.length > 0) {
+                    // 点聚合不可用，直接添加标记到地图
+                    markers.forEach(marker => map.add(marker));
+                    updateDebugInfo(`已直接添加 ${markers.length} 个标记（点聚合不可用）`);
+                }
+                
+                // 调整地图视野以包含所有标记
+                if (markers.length > 0) {
+                    map.setFitView();
+                    updateDebugInfo(`已在地图上添加 ${markers.length} 个标记`);
+                }
+            }
+            
+            // 清除搜索标记（保留中心点标记）
+            function clearSearchMarkers() {
+                if (markerCluster && window.AMap && window.AMap.MarkerClusterer) {
+                    markerCluster.clearMarkers();
+                    markerCluster = null;
+                }
+                
+                markers.forEach(marker => {
+                    map.remove(marker);
+                });
+                
+                infoWindows.forEach(infoWindow => {
+                    infoWindow.close();
+                });
+                
+                markers = [];
+                infoWindows = [];
+                
+                updateDebugInfo('搜索标记已清除');
+            }
+            
+            // 清除所有地图标记（包括中心点标记）
+            function clearAllMarkers() {
+                clearSearchMarkers();
+                
+                // 清除中心点标记
+                if (centerMarker) {
+                    map.remove(centerMarker);
+                    centerMarker = null;
+                }
+                
+                updateDebugInfo('所有地图标记已清除');
+            }
+            
+            // 高亮列表项
+            function highlightListItem(index) {
+                const poiItems = document.querySelectorAll('.poi-item');
+                poiItems.forEach(item => item.classList.remove('active'));
+                
+                if (poiItems[index]) {
+                    poiItems[index].classList.add('active');
+                    poiItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            
+            // 切换全屏
+            function toggleFullscreen() {
+                if (mapSection.classList.contains('fullscreen')) {
+                    // 退出全屏
+                    mapSection.classList.remove('fullscreen');
+                    fullscreenBtn.textContent = '全屏';
+                    updateDebugInfo('已退出全屏模式');
+                } else {
+                    // 进入全屏
+                    mapSection.classList.add('fullscreen');
+                    fullscreenBtn.textContent = '退出全屏';
+                    updateDebugInfo('已进入全屏模式');
+                }
+                
+                // 刷新地图
+                if (map) {
+                    setTimeout(() => {
+                        map.setFitView();
+                    }, 300);
+                }
+            }
+            
+            // 获取当前位置
+            function getCurrentLocation() {
+                if (!navigator.geolocation) {
+                    showError('您的浏览器不支持地理位置功能');
+                    return;
+                }
+                
+                currentLocationBtn.disabled = true;
+                currentLocationBtn.textContent = '定位中...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        
+                        // 更新坐标输入框
+                        document.getElementById('location').value = `${longitude},${latitude}`;
+                        
+                        // 在地图上显示当前位置
+                        if (isMapInitialized && map) {
+                            // 清除之前的中心点标记
+                            if (centerMarker) {
+                                map.remove(centerMarker);
+                            }
+                            
+                            // 创建当前位置标记
+                            centerMarker = new AMap.Marker({
+                                position: [longitude, latitude],
+                                title: '当前位置',
+                                content: `<div style="background-color: #4caf50; color: white; border-radius: 50%; width: 30px; height: 30px; text-align: center; line-height: 30px; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">我</div>`,
+                                offset: new AMap.Pixel(-15, -15),
+                                zIndex: 100
+                            });
+                            
+                            // 创建信息窗口
+                            const infoWindow = new AMap.InfoWindow({
+                                content: `<div style="padding: 10px;">
+                                            <h3 style="margin: 0 0 10px; color: #4caf50;">当前位置</h3>
+                                            <p><strong>坐标:</strong> ${longitude},${latitude}</p>
+                                          </div>`,
+                                offset: new AMap.Pixel(0, -30)
+                            });
+                            
+                            // 标记点击事件
+                            centerMarker.on('click', function() {
+                                infoWindow.open(map, centerMarker.getPosition());
+                            });
+                            
+                            map.add(centerMarker);
+                            
+                            // 将地图中心移动到当前位置
+                            map.setCenter([longitude, latitude]);
+                            map.setZoom(16);
+                        }
+                        
+                        showSuccess('当前位置已获取并设置');
+                        updateDebugInfo(`当前位置: ${longitude},${latitude}`);
+                        
+                        currentLocationBtn.disabled = false;
+                        currentLocationBtn.textContent = '定位当前位置';
+                    },
+                    function(error) {
+                        let errorMessage = '获取位置失败: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += '用户拒绝了位置请求';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += '位置信息不可用';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += '位置请求超时';
+                                break;
+                            default:
+                                errorMessage += '未知错误';
+                        }
+                        
+                        showError(errorMessage);
+                        updateDebugInfo(errorMessage);
+                        
+                        currentLocationBtn.disabled = false;
+                        currentLocationBtn.textContent = '定位当前位置';
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            }
+            
+            // 地址搜索（显示多个结果）
+            function searchAddress(address, apiKey) {
+                const url = 'https://restapi.amap.com/v3/geocode/geo';
+                const params = new URLSearchParams({
+                    key: apiKey,
+                    address: address,
+                    output: 'json'
+                });
+                
+                fetch(`${url}?${params.toString()}`)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.status === '1' && result.geocodes && result.geocodes.length > 0) {
+                            displayAddressResults(result.geocodes);
+                        } else {
+                            addressResults.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('地址搜索失败:', error);
+                        addressResults.style.display = 'none';
+                    });
+            }
+            
+            // 显示地址搜索结果
+            function displayAddressResults(geocodes) {
+                addressResults.innerHTML = '';
+                
+                geocodes.forEach((geocode, index) => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'address-result-item';
+                    resultItem.innerHTML = `
+                        <div class="address-name">${geocode.formatted_address}</div>
+                        <div class="address-details">
+                            <div>坐标: ${geocode.location}</div>
+                            <div>区域: ${geocode.province} ${geocode.city} ${geocode.district}</div>
+                        </div>
+                    `;
+                    
+                    resultItem.addEventListener('click', function() {
+                        // 设置坐标
+                        document.getElementById('location').value = geocode.location;
+                        
+                        // 更新地址输入框
+                        addressInput.value = geocode.formatted_address;
+                        
+                        // 隐藏结果列表
+                        addressResults.style.display = 'none';
+                        
+                        // 在地图上显示该位置
+                        if (isMapInitialized && map) {
+                            const location = geocode.location.split(',').map(Number);
+                            map.setCenter(location);
+                            map.setZoom(16);
+                            
+                            // 更新中心点标记
+                            showCenterMarker();
+                        }
+                        
+                        showSuccess(`已选择: ${geocode.formatted_address}`);
+                        updateDebugInfo(`已选择地址: ${geocode.formatted_address}, 坐标: ${geocode.location}`);
+                    });
+                    
+                    addressResults.appendChild(resultItem);
+                });
+                
+                addressResults.style.display = 'block';
+            }
+            
+            // 全局函数，供信息窗口调用
+            window.focusOnPoi = function(index) {
+                highlightListItem(index);
+            };
+            
             // 确认坐标按钮点击事件
             confirmBtn.addEventListener('click', function() {
                 document.getElementById('location').value = currentConvertedLocation;
                 verifyArea.style.display = 'none';
                 showSuccess('坐标已确认并设置');
+                
+                // 更新中心点标记
+                if (isMapInitialized && map) {
+                    showCenterMarker();
+                }
             });
             
             // 拒绝坐标按钮点击事件
@@ -658,7 +1470,7 @@
                 const location = document.getElementById('location').value.trim();
                 
                 if (!apiKey) {
-                    showError('请输入高德API Key');
+                    showError('请输入高德Web服务API Key');
                     updateDebugInfo('错误: 未输入API Key');
                     return;
                 }
@@ -776,13 +1588,20 @@
                     updateDebugInfo(`地址转换响应: ${JSON.stringify(result)}`);
                     
                     if (result.status === '1' && result.geocodes && result.geocodes.length > 0) {
-                        const location = result.geocodes[0].location;
-                        currentConvertedLocation = location;
-                        updateDebugInfo(`转换成功，坐标: ${location}`);
-                        
-                        // 验证坐标准确性
-                        await verifyCoordinates(location, apiKey);
-                        
+                        if (result.geocodes.length === 1) {
+                            // 只有一个结果，直接使用
+                            const location = result.geocodes[0].location;
+                            currentConvertedLocation = location;
+                            updateDebugInfo(`转换成功，坐标: ${location}`);
+                            
+                            // 验证坐标准确性
+                            await verifyCoordinates(location, apiKey);
+                        } else {
+                            // 多个结果，显示供用户选择
+                            displayAddressResults(result.geocodes);
+                            showSuccess(`找到 ${result.geocodes.length} 个匹配地址，请选择一个`);
+                            updateDebugInfo(`找到 ${result.geocodes.length} 个匹配地址`);
+                        }
                     } else {
                         throw new Error(result.info || '地址转换失败');
                     }
@@ -921,8 +1740,12 @@
                         
                         // 生成CSV内容
                         csvContent = generateCSVContent(searchResults);
+                        
+                        // 在地图上显示标记
+                        addMarkersToMap(searchResults);
+                        
                         showSuccess('搜索完成，可以选择下载、复制或显示CSV数据');
-                        updateDebugInfo('搜索完成，CSV内容已生成');
+                        updateDebugInfo('搜索完成，CSV内容已生成，地图标记已添加');
                     } else {
                         status.textContent = '未找到任何数据';
                         updateDebugInfo('搜索完成，未找到数据');
@@ -984,7 +1807,7 @@
                 }
             }
             
-            // 更新结果显示 - 修复版：显示图片
+            // 更新结果显示 - 修复版：显示图片并添加点击事件
             function updateResultDisplay(pois) {
                 resultArea.innerHTML = '';
                 
@@ -996,6 +1819,7 @@
                 pois.forEach((poi, index) => {
                     const poiElement = document.createElement('div');
                     poiElement.className = 'poi-item';
+                    poiElement.dataset.index = index;
                     
                     // 处理biz_ext字段 - 从字符串解析为对象
                     let bizExt = {};
@@ -1054,6 +1878,23 @@
                         </div>
                     `;
                     
+                    // 添加点击事件，点击列表项时在地图上高亮对应标记
+                    poiElement.addEventListener('click', function() {
+                        const itemIndex = parseInt(this.dataset.index);
+                        highlightListItem(itemIndex);
+                        
+                        // 在地图上高亮对应标记
+                        if (isMapInitialized && markers[itemIndex]) {
+                            // 关闭所有信息窗口
+                            infoWindows.forEach(iw => iw.close());
+                            // 打开当前信息窗口
+                            infoWindows[itemIndex].open(map, markers[itemIndex].getPosition());
+                            // 将地图中心移动到标记位置
+                            map.setCenter(markers[itemIndex].getPosition());
+                            map.setZoom(16);
+                        }
+                    });
+                    
                     resultArea.appendChild(poiElement);
                 });
             }
@@ -1064,7 +1905,6 @@
                 imageModal.style.display = 'flex';
             };
             
-            // 生成CSV内容 - 修复版：正确处理biz_ext字段
             // 生成CSV内容 - 修复版：正确处理biz_ext字段和字符串类型
             function generateCSVContent(pois) {
                 // CSV标题行
