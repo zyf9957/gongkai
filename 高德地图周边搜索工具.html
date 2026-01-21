@@ -21,7 +21,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -46,52 +46,22 @@
             opacity: 0.9;
         }
         
-        /* 修改主内容区域为三列布局 */
-        .main-content {
+        .content {
             display: flex;
             flex-wrap: wrap;
             padding: 20px;
-            gap: 20px;
         }
         
-        /* 左侧表单区域 */
         .form-section {
             flex: 1;
-            min-width: 350px;
-            max-width: 400px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        /* 右侧内容区域 - 包含地图和搜索结果 */
-        .right-content {
-            flex: 3;
-            min-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        /* 地图容器区域 */
-        .map-display-section {
-            background: white;
-            border-radius: 8px;
+            min-width: 300px;
             padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            display: none; /* 默认隐藏，点击按钮后显示 */
         }
         
-        /* 搜索结果区域 */
         .result-section {
-            background: white;
-            border-radius: 8px;
+            flex: 2;
+            min-width: 300px;
             padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
         }
         
         .form-group {
@@ -147,29 +117,13 @@
             cursor: not-allowed;
         }
         
-        /* 搜索结果区域样式 */
-        .result-area-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 300px;
-        }
-        
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
         .result-area {
-            flex: 1;
+            margin-top: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 15px;
-            max-height: 500px;
+            min-height: 200px;
+            max-height: 60vh;
             overflow-y: auto;
             background: #f9f9f9;
         }
@@ -242,80 +196,19 @@
         }
         
         /* 地图容器样式 */
-        .map-container-wrapper {
+        .map-section {
+            margin-top: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: hidden;
             height: 500px;
+            display: none;
             position: relative;
         }
         
         #mapContainer {
             width: 100%;
             height: 100%;
-        }
-        
-        /* 地图加载状态样式 */
-        .map-loading-state {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        
-        .map-loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1e88e5;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .map-error-state {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .map-error-icon {
-            font-size: 48px;
-            color: #f44336;
-            margin-bottom: 15px;
-        }
-        
-        .retry-loading-btn {
-            background: #f44336;
-            margin-top: 15px;
-            width: auto;
-            padding: 8px 20px;
-        }
-        
-        .retry-loading-btn:hover {
-            background: #d32f2f;
         }
         
         .map-controls {
@@ -410,20 +303,12 @@
             color: #f44336;
             margin-top: 10px;
             font-size: 14px;
-            padding: 10px;
-            background: #ffebee;
-            border-radius: 5px;
-            border: 1px solid #ffcdd2;
         }
         
         .success {
             color: #4caf50;
             margin-top: 10px;
             font-size: 14px;
-            padding: 10px;
-            background: #e8f5e9;
-            border-radius: 5px;
-            border: 1px solid #c8e6c9;
         }
         
         .location-group {
@@ -672,171 +557,111 @@
             background: #ff9800;
         }
         
-        /* 搜索类型切换按钮 */
-        .search-type-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .location-group {
+                flex-direction: column;
+            }
+            
+            .verify-buttons {
+                flex-direction: column;
+            }
+            
+            .export-options {
+                flex-direction: column;
+            }
+            
+            .poi-images {
+                justify-content: center;
+            }
+            
+            .map-controls {
+                flex-direction: column;
+            }
+            
+            .map-tools {
+                flex-direction: column;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .polygon-controls {
+                flex-direction: column;
+            }
+            
+            .polygon-control-panel {
+                left: 10px;
+                right: 10px;
+                min-width: unset;
+            }
         }
         
-        .search-type-tab {
-            flex: 1;
-            padding: 10px 15px;
-            background: #e9ecef;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            color: #495057;
-            transition: all 0.3s;
-        }
-        
-        .search-type-tab:hover {
-            background: #dee2e6;
-        }
-        
-        .search-type-tab.active {
-            background: #1e88e5;
-            color: white;
-            font-weight: bold;
-        }
-        
-        /* 搜索面板容器 */
-        .search-panel {
-            display: none;
-            padding: 15px;
-            background: #f8f9fa;
+        .debug-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
             border-radius: 5px;
-            border: 1px solid #dee2e6;
-        }
-        
-        .search-panel.active {
-            display: block;
-        }
-        
-        /* 圆形搜索面板样式 */
-        .circular-search-panel {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border: 1px solid #90caf9;
-        }
-        
-        /* 多边形搜索面板样式 */
-        .polygon-search-panel {
-            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
-            border: 1px solid #ce93d8;
-        }
-        
-        /* 修复控件位置重叠问题 - 进一步调整控件位置 */
-        .amap-hawk-eye {
-            right: 10px !important;
-            bottom: 100px !important; /* 向下移动更多 */
-        }
-        
-        /* 地图类型控件样式调整 */
-        .amap-maptype-control {
-            right: 10px !important;
-            top: 150px !important; /* 向下移动更多 */
-        }
-        
-        /* 控制条控件样式调整 */
-        .amap-control-bar {
-            right: 10px !important;
-            top: 200px !important; /* 向下移动更多 */
-        }
-        
-        /* 工具条控件样式调整 */
-        .amap-toolbar {
-            top: 10px !important;
-            left: 10px !important;
-        }
-        
-        /* 比例尺控件样式调整 */
-        .amap-scalecontrol {
-            bottom: 40px !important;
-            left: 10px !important;
-        }
-        
-        /* 地图工具按钮容器 */
-        .map-tools-container {
-            position: absolute;
-            top: 10px;
-            left: 50px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 100;
-        }
-        
-        .map-tools-container button {
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            border-radius: 50%;
             font-size: 12px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            border: 1px solid #ddd;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .map-tools-container button:hover {
-            background: white;
-            transform: scale(1.05);
-        }
-        
-        .map-tools-container button i {
-            font-style: normal;
-            font-weight: bold;
-        }
-        
-        /* 地图点击信息显示 */
-        .map-click-info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 13px;
-            z-index: 99;
+            color: #856404;
             display: none;
-            max-width: 280px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         
-        .map-click-info h4 {
-            margin: 0 0 8px 0;
-            color: #fff;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 5px;
+        .view-images-btn {
+            background: #607d8b;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 3px;
+            margin-top: 5px;
+            display: inline-block;
         }
         
-        .map-click-info .close-btn {
-            position: absolute;
-            top: 5px;
-            right: 8px;
-            background: transparent;
-            color: white;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            line-height: 24px;
-            text-align: center;
+        .view-images-btn:hover {
+            background: #455a64;
         }
         
-        .map-click-info .close-btn:hover {
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
+        /* 地图按钮样式 */
+        .map-toggle-btn {
+            background: #9c27b0;
+            margin-top: 10px;
+        }
+        
+        .map-toggle-btn:hover {
+            background: #7b1fa2;
+        }
+        
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .api-key-group input {
+            flex: 2;
+        }
+        
+        .api-key-group button {
+            flex: 1;
+            background: #9c27b0;
+        }
+        
+        .api-key-group button:hover {
+            background: #7b1fa2;
+        }
+        
+        /* 安全密钥样式 */
+        .security-key-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .security-key-group input {
+            flex: 1;
         }
         
         /* 全屏样式 */
@@ -859,7 +684,7 @@
             background: rgba(0, 0, 0, 0.9);
         }
         
-        .map-container-wrapper.fullscreen {
+        .map-section.fullscreen {
             position: fixed;
             top: 0;
             left: 0;
@@ -1035,142 +860,171 @@
             background: #546e7a;
         }
         
-        /* 地图显示/隐藏控制按钮 */
-        .map-toggle-area {
+        /* 地图内工具按钮容器 */
+        .map-tools-container {
+            position: absolute;
+            top: 10px;
+            left: 50px;
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
         }
         
-        .map-toggle-area button {
-            flex: 1;
-        }
-        
-        .show-map-btn {
-            background: #9c27b0;
-        }
-        
-        .show-map-btn:hover {
-            background: #7b1fa2;
-        }
-        
-        .hide-map-btn {
-            background: #607d8b;
-        }
-        
-        .hide-map-btn:hover {
-            background: #546e7a;
-        }
-        
-        .debug-info {
-            margin-top: 10px;
-            padding: 10px;
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 5px;
+        .map-tools-container button {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
             font-size: 12px;
-            color: #856404;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .map-tools-container button:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+        
+        .map-tools-container button i {
+            font-style: normal;
+            font-weight: bold;
+        }
+        
+        /* 地图点击信息显示 */
+        .map-click-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            z-index: 99;
             display: none;
+            max-width: 280px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         
-        .view-images-btn {
-            background: #607d8b;
-            padding: 4px 8px;
-            font-size: 12px;
-            border-radius: 3px;
-            margin-top: 5px;
-            display: inline-block;
+        .map-click-info h4 {
+            margin: 0 0 8px 0;
+            color: #fff;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 5px;
         }
         
-        .view-images-btn:hover {
-            background: #455a64;
+        .map-click-info .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: transparent;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
         }
         
-        .api-key-group {
+        .map-click-info .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+        }
+        
+        /* 搜索类型切换按钮 */
+        .search-type-tabs {
             display: flex;
-            gap: 10px;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
         }
         
-        .api-key-group input {
-            flex: 2;
-        }
-        
-        .api-key-group button {
+        .search-type-tab {
             flex: 1;
-            background: #9c27b0;
+            padding: 10px 15px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
         }
         
-        .api-key-group button:hover {
-            background: #7b1fa2;
+        .search-type-tab:hover {
+            background: #dee2e6;
         }
         
-        /* 安全密钥样式 */
-        .security-key-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
+        .search-type-tab.active {
+            background: #1e88e5;
+            color: white;
+            font-weight: bold;
         }
         
-        .security-key-group input {
-            flex: 1;
+        /* 搜索面板容器 */
+        .search-panel {
+            display: none;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
         }
         
-        @media (max-width: 1200px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .form-section {
-                max-width: 100%;
-            }
-            
-            .right-content {
-                min-width: 100%;
-            }
+        .search-panel.active {
+            display: block;
         }
         
-        @media (max-width: 768px) {
-            .location-group {
-                flex-direction: column;
-            }
-            
-            .verify-buttons {
-                flex-direction: column;
-            }
-            
-            .export-options {
-                flex-direction: column;
-            }
-            
-            .poi-images {
-                justify-content: center;
-            }
-            
-            .map-controls {
-                flex-direction: column;
-            }
-            
-            .map-tools {
-                flex-direction: column;
-            }
-            
-            .tools-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .polygon-controls {
-                flex-direction: column;
-            }
-            
-            .polygon-control-panel {
-                left: 10px;
-                right: 10px;
-                min-width: unset;
-            }
-            
-            .map-toggle-area {
-                flex-direction: column;
-            }
+        /* 圆形搜索面板样式 */
+        .circular-search-panel {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 1px solid #90caf9;
+        }
+        
+        /* 多边形搜索面板样式 */
+        .polygon-search-panel {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border: 1px solid #ce93d8;
+        }
+        
+        /* 修复控件位置重叠问题 - 进一步调整控件位置 */
+        .amap-hawk-eye {
+            right: 10px !important;
+            bottom: 100px !important; /* 向下移动更多 */
+        }
+        
+        /* 地图类型控件样式调整 */
+        .amap-maptype-control {
+            right: 10px !important;
+            top: 150px !important; /* 向下移动更多 */
+        }
+        
+        /* 控制条控件样式调整 */
+        .amap-control-bar {
+            right: 10px !important;
+            top: 200px !important; /* 向下移动更多 */
+        }
+        
+        /* 工具条控件样式调整 */
+        .amap-toolbar {
+            top: 10px !important;
+            left: 10px !important;
+        }
+        
+        /* 比例尺控件样式调整 */
+        .amap-scalecontrol {
+            bottom: 40px !important;
+            left: 10px !important;
         }
     </style>
 </head>
@@ -1187,8 +1041,7 @@
             <p class="description">探索周边好工具 - 支持圆形和多边形搜索</p>
         </header>
         
-        <div class="main-content">
-            <!-- 左侧表单区域 -->
+        <div class="content">
             <div class="form-section">
                 <!-- 地图API密钥和安全密钥输入 -->
                 <div class="form-group">
@@ -1196,6 +1049,7 @@
                     <div class="api-key-group">
                         <input type="text" id="mapApiKey" placeholder="请输入高德地图JavaScript API Key" value="14a88a049e836f81f7989060a9060815">
                         <button id="loadMapBtn">加载地图</button>
+                        <button id="toggleMapBtn" class="map-toggle-btn" disabled>显示地图</button>
                     </div>
                     <div class="help-text">请确保您有高德地图JavaScript API权限，支持3D地图功能</div>
                     
@@ -1204,12 +1058,6 @@
                         <input type="text" id="securityKey" placeholder="请输入安全密钥 (可选)" value="fefc8420d371de29e4ccfd3c28bffb56">
                     </div>
                     <div class="help-text">如果您的API Key配置了安全密钥，请在此输入</div>
-                </div>
-                
-                <!-- 地图显示控制按钮 -->
-                <div class="map-toggle-area">
-                    <button id="showMapBtn" class="show-map-btn" disabled>显示地图</button>
-                    <button id="hideMapBtn" class="hide-map-btn" disabled style="display: none;">隐藏地图</button>
                 </div>
                 
                 <!-- 搜索类型切换标签 -->
@@ -1299,6 +1147,8 @@
                         </div>
                         <div class="help-text">设置请求间隔，避免超出API限制</div>
                     </div>
+                    
+                    <!-- <button id="searchBtn">开始圆形搜索</button> -->
                 </div>
                 
                 <!-- 多边形搜索面板 -->
@@ -1367,6 +1217,7 @@
                         <div class="help-text">设置请求间隔，避免超出API限制</div>
                     </div>
                     
+                    
                     <div class="polygon-status">
                         <div id="polygonInstruction" class="polygon-instruction">点击"开始绘制多边形"按钮，在地图上绘制多边形区域</div>
                         <div id="polygonPointCount" class="polygon-point-count" style="display: none;">已绘制: <span id="pointCount">0</span> 个顶点</div>
@@ -1374,56 +1225,68 @@
                     </div>
                 </div>
                 
-                <button id="debugBtn" style="background: #ff9800; margin-top: 15px;">调试信息</button>
+                <!-- <button id="toggleMapBtn" class="map-toggle-btn" disabled>显示地图 (请先加载地图)</button> -->
+                <button id="debugBtn" style="background: #ff9800; margin-top: 5px;">调试信息</button>
             </div>
             
-            <!-- 右侧内容区域 - 包含地图和搜索结果 -->
-            <div class="right-content">
-                <!-- 地图显示区域 -->
-                <div class="map-display-section" id="mapDisplaySection">
-                    <h2>地图视图</h2>
-                    <div class="map-container-wrapper" id="mapContainerWrapper">
-                        <!-- 地图加载状态 -->
-                        <div id="mapLoadingState" class="map-loading-state" style="display: none;">
-                            <div class="map-loading-spinner"></div>
-                            <div id="mapLoadingText">地图加载中...</div>
-                        </div>
-                        
-                        <!-- 地图错误状态 -->
-                        <div id="mapErrorState" class="map-error-state">
-                            <div class="map-error-icon">⚠️</div>
-                            <h3 id="mapErrorTitle">地图加载失败</h3>
-                            <p id="mapErrorMessage">请检查API Key是否正确，或网络连接是否正常</p>
-                            <button id="retryLoadingBtn" class="retry-loading-btn">重新加载地图</button>
-                        </div>
-                        
-                        <button id="fullscreenBtn" class="fullscreen-btn">全屏</button>
-                        
-                        <!-- 地图内工具按钮容器 -->
-                        <div class="map-tools-container">
-                            <button id="satelliteBtn" title="卫星图"><i>卫</i></button>
-                            <button id="normalMapBtn" title="标准地图"><i>标</i></button>
-                            <button id="drawCircleBtn" title="画圈(半径)"><i>圈</i></button>
-                            <button id="measureDistanceBtn" title="测距"><i>测</i></button>
-                            <button id="toggle3dBtn" title="切换3D视图"><i>3D</i></button>
-                            <button id="resetViewBtn" title="重置视图"><i>重</i></button>
-                            <button id="clearToolsBtn" title="清除工具"><i>清</i></button>
-                        </div>
-                        
-                        <!-- 地图点击信息显示 -->
-                        <div id="mapClickInfo" class="map-click-info">
-                            <h4>地图点击信息</h4>
-                            <button class="close-btn" onclick="closeMapClickInfo()">×</button>
-                            <div id="clickLocation">位置: </div>
-                            <div id="clickZoomLevel">缩放级别: </div>
-                        </div>
-                        
-                        <!-- 地图信息显示区域 -->
-                        <div id="circleRadiusInfo" class="map-info circle-radius-info">半径: 0米</div>
-                        <div id="distanceInfo" class="map-info distance-info">距离: 0米</div>
-                        
-                        <div id="mapContainer"></div>
+            <div class="result-section">
+                <h2>搜索结果</h2>
+                
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                
+                <div class="status" id="status">等待搜索...</div>
+                
+                <div id="debugInfo" class="debug-info">
+                    <strong>调试信息:</strong>
+                    <div id="debugContent"></div>
+                </div>
+                
+                <div class="result-area" id="resultArea">
+                    <!-- 搜索结果将在这里显示 -->
+                </div>
+                
+                <!-- CSV操作按钮区域 -->
+                <div class="export-options">
+                    <button id="downloadBtn" class="download-btn" disabled>下载CSV文件</button>
+                    <button id="copyBtn" class="copy-btn" disabled>复制CSV数据</button>
+                    <button id="exportBtn" class="export-btn" disabled>显示CSV数据</button>
+                </div>
+                
+                <div id="exportArea" class="export-area">
+                    <label for="csvData">CSV数据 (可全选复制):</label>
+                    <textarea id="csvData" readonly></textarea>
+                </div>
+                
+                <!-- 地图容器 -->
+                <div class="map-section" id="mapSection">
+                    <button id="fullscreenBtn" class="fullscreen-btn">全屏</button>
+                    
+                    <!-- 地图内工具按钮容器 -->
+                    <div class="map-tools-container">
+                        <button id="satelliteBtn" title="卫星图"><i>卫</i></button>
+                        <button id="normalMapBtn" title="标准地图"><i>标</i></button>
+                        <button id="drawCircleBtn" title="画圈(半径)"><i>圈</i></button>
+                        <button id="measureDistanceBtn" title="测距"><i>测</i></button>
+                        <button id="toggle3dBtn" title="切换3D视图"><i>3D</i></button>
+                        <button id="resetViewBtn" title="重置视图"><i>重</i></button>
+                        <button id="clearToolsBtn" title="清除工具"><i>清</i></button>
                     </div>
+                    
+                    <!-- 地图点击信息显示 -->
+                    <div id="mapClickInfo" class="map-click-info">
+                        <h4>地图点击信息</h4>
+                        <button class="close-btn" onclick="closeMapClickInfo()">×</button>
+                        <div id="clickLocation">位置: </div>
+                        <div id="clickZoomLevel">缩放级别: </div>
+                    </div>
+                    
+                    <!-- 地图信息显示区域 -->
+                    <div id="circleRadiusInfo" class="map-info circle-radius-info">半径: 0米</div>
+                    <div id="distanceInfo" class="map-info distance-info">距离: 0米</div>
+                    
+                    <div id="mapContainer"></div>
                     
                     <div class="map-controls">
                         <button id="clearMarkersBtn" class="clear-markers-btn">清除标记</button>
@@ -1432,43 +1295,8 @@
                     </div>
                 </div>
                 
-                <!-- 搜索结果区域 -->
-                <div class="result-section">
-                    <div class="result-header">
-                        <h2>搜索结果</h2>
-                        <div class="status" id="status">等待搜索...</div>
-                    </div>
-                    
-                    <div class="progress-bar">
-                        <div class="progress" id="progress"></div>
-                    </div>
-                    
-                    <div class="result-area-container">
-                        <div id="debugInfo" class="debug-info">
-                            <strong>调试信息:</strong>
-                            <div id="debugContent"></div>
-                        </div>
-                        
-                        <div class="result-area" id="resultArea">
-                            <!-- 搜索结果将在这里显示 -->
-                        </div>
-                        
-                        <!-- CSV操作按钮区域 -->
-                        <div class="export-options">
-                            <button id="downloadBtn" class="download-btn" disabled>下载CSV文件</button>
-                            <button id="copyBtn" class="copy-btn" disabled>复制CSV数据</button>
-                            <button id="exportBtn" class="export-btn" disabled>显示CSV数据</button>
-                        </div>
-                        
-                        <div id="exportArea" class="export-area">
-                            <label for="csvData">CSV数据 (可全选复制):</label>
-                            <textarea id="csvData" readonly></textarea>
-                        </div>
-                        
-                        <div id="errorArea" class="error"></div>
-                        <div id="successArea" class="success"></div>
-                    </div>
-                </div>
+                <div id="errorArea" class="error"></div>
+                <div id="successArea" class="success"></div>
             </div>
         </div>
     </div>
@@ -1521,28 +1349,16 @@
             const circularSearchPanel = document.getElementById('circularSearchPanel');
             const polygonSearchPanel = document.getElementById('polygonSearchPanel');
             
-            // 地图显示控制相关元素
-            const mapDisplaySection = document.getElementById('mapDisplaySection');
-            const showMapBtn = document.getElementById('showMapBtn');
-            const hideMapBtn = document.getElementById('hideMapBtn');
-            const loadMapBtn = document.getElementById('loadMapBtn');
-            const mapApiKeyInput = document.getElementById('mapApiKey');
-            const securityKeyInput = document.getElementById('securityKey');
-            
             // 地图相关元素
-            const mapContainerWrapper = document.getElementById('mapContainerWrapper');
+            const mapSection = document.getElementById('mapSection');
+            const toggleMapBtn = document.getElementById('toggleMapBtn');
             const clearMarkersBtn = document.getElementById('clearMarkersBtn');
             const fitViewBtn = document.getElementById('fitViewBtn');
             const showCenterBtn = document.getElementById('showCenterBtn');
             const fullscreenBtn = document.getElementById('fullscreenBtn');
-            
-            // 地图加载状态元素
-            const mapLoadingState = document.getElementById('mapLoadingState');
-            const mapLoadingText = document.getElementById('mapLoadingText');
-            const mapErrorState = document.getElementById('mapErrorState');
-            const mapErrorTitle = document.getElementById('mapErrorTitle');
-            const mapErrorMessage = document.getElementById('mapErrorMessage');
-            const retryLoadingBtn = document.getElementById('retryLoadingBtn');
+            const loadMapBtn = document.getElementById('loadMapBtn');
+            const mapApiKeyInput = document.getElementById('mapApiKey');
+            const securityKeyInput = document.getElementById('securityKey');
             
             // 地址搜索相关元素
             const addressInput = document.getElementById('address');
@@ -1596,8 +1412,6 @@
             let isMapVisible = false;
             let isMapLoaded = false;
             let centerMarker = null; // 中心点标记
-            let mapApiKey = ''; // 存储地图API Key
-            let mapSecurityKey = ''; // 存储地图安全密钥
             
             // 地图工具相关变量
             let circle = null; // 圆形覆盖物
@@ -1631,109 +1445,6 @@
                 circularSearchPanel.classList.remove('active');
             });
             
-            // 显示地图按钮事件
-            showMapBtn.addEventListener('click', function() {
-                if (!isMapLoaded) {
-                    showError('请先加载地图');
-                    return;
-                }
-                
-                if (!isMapInitialized) {
-                    // 显示地图前先初始化
-                    showMapLoading('正在初始化地图...');
-                    try {
-                        initMap();
-                    } catch (error) {
-                        showMapError('地图初始化失败', error.message);
-                        return;
-                    }
-                }
-                
-                mapDisplaySection.style.display = 'block';
-                isMapVisible = true;
-                showMapBtn.style.display = 'none';
-                hideMapBtn.style.display = 'block';
-                updateDebugInfo('地图已显示');
-                
-                if (map) {
-                    setTimeout(() => {
-                        try {
-                            map.resize();
-                        } catch (e) {
-                            console.warn('地图resize时出错:', e);
-                        }
-                    }, 100);
-                }
-            });
-            
-            // 隐藏地图按钮事件
-            hideMapBtn.addEventListener('click', function() {
-                mapDisplaySection.style.display = 'none';
-                isMapVisible = false;
-                showMapBtn.style.display = 'block';
-                hideMapBtn.style.display = 'none';
-                updateDebugInfo('地图已隐藏');
-            });
-            
-            // 加载地图按钮事件
-            loadMapBtn.addEventListener('click', function() {
-                loadMap();
-            });
-            
-            // 重新加载地图按钮事件
-            retryLoadingBtn.addEventListener('click', function() {
-                loadMap();
-            });
-            
-            // 加载地图函数
-            function loadMap() {
-                mapApiKey = mapApiKeyInput.value.trim();
-                mapSecurityKey = securityKeyInput.value.trim();
-                
-                if (!mapApiKey) {
-                    showError('请输入高德地图API Key');
-                    return;
-                }
-                
-                // 显示加载状态
-                showMapLoading('正在加载地图API...');
-                hideMapError();
-                
-                loadMapBtn.disabled = true;
-                loadMapBtn.textContent = '加载中...';
-                
-                loadAmapScript(mapApiKey, mapSecurityKey);
-            }
-            
-            // 显示地图加载状态
-            function showMapLoading(text) {
-                mapLoadingText.textContent = text || '地图加载中...';
-                mapLoadingState.style.display = 'flex';
-                hideMapError();
-            }
-            
-            // 隐藏地图加载状态
-            function hideMapLoading() {
-                mapLoadingState.style.display = 'none';
-            }
-            
-            // 显示地图错误状态
-            function showMapError(title, message) {
-                mapErrorTitle.textContent = title || '地图加载失败';
-                mapErrorMessage.textContent = message || '请检查API Key是否正确，或网络连接是否正常';
-                mapErrorState.style.display = 'flex';
-                hideMapLoading();
-                
-                // 启用重新加载按钮
-                loadMapBtn.disabled = false;
-                loadMapBtn.textContent = '重新加载地图';
-            }
-            
-            // 隐藏地图错误状态
-            function hideMapError() {
-                mapErrorState.style.display = 'none';
-            }
-            
             // 添加调试按钮事件
             debugBtn.addEventListener('click', function() {
                 debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
@@ -1757,24 +1468,28 @@
                 mapClickInfo.style.display = 'none';
             };
             
+            // 加载地图按钮事件
+            loadMapBtn.addEventListener('click', function() {
+                const mapApiKey = mapApiKeyInput.value.trim();
+                const securityKey = securityKeyInput.value.trim();
+                
+                if (!mapApiKey) {
+                    showError('请输入高德地图API Key');
+                    return;
+                }
+                
+                loadMapBtn.disabled = true;
+                loadMapBtn.textContent = '加载中...';
+                
+                loadAmapScript(mapApiKey, securityKey);
+            });
+            
             // 加载高德地图脚本
             function loadAmapScript(apiKey, securityKey) {
-                updateDebugInfo('开始加载高德地图API...');
-                
-                // 清理可能存在的旧脚本
-                const oldScripts = document.querySelectorAll('script[src*="amap.com"]');
-                oldScripts.forEach(script => {
-                    if (script.parentNode) {
-                        script.parentNode.removeChild(script);
-                    }
-                });
-                
-                // 清理全局变量
                 if (window.AMap) {
-                    delete window.AMap;
-                }
-                if (window.MarkerClusterer) {
-                    delete window.MarkerClusterer;
+                    console.log('高德地图API已加载，直接初始化地图');
+                    initMap();
+                    return;
                 }
                 
                 let apiUrl = `https://webapi.amap.com/maps?v=2.0&key=${apiKey}&plugin=AMap.ToolBar,AMap.Scale,AMap.HawkEye,AMap.MapType,AMap.ControlBar,AMap.PlaceSearch,AMap.BuildingLayer,AMap.MouseTool`;
@@ -1783,70 +1498,39 @@
                     apiUrl += `&security=${securityKey}`;
                 }
                 
-                updateDebugInfo(`地图API URL: ${apiUrl.replace(apiKey, '***')}`);
-                
                 const script = document.createElement('script');
                 script.type = 'text/javascript';
                 script.src = apiUrl;
-                
-                // 设置超时
-                const timeout = setTimeout(() => {
-                    showMapError('地图加载超时', '地图API加载超时，请检查网络连接');
-                    updateDebugInfo('地图API加载超时');
-                }, 15000);
-                
                 script.onload = function() {
-                    clearTimeout(timeout);
                     console.log('高德地图API加载成功');
                     updateDebugInfo('高德地图API加载成功，包含3D地图插件');
-                    
-                    // 加载成功后启用显示地图按钮
-                    showMapBtn.disabled = false;
-                    showMapBtn.textContent = '显示地图';
-                    loadMapBtn.textContent = '重新加载地图';
-                    loadMapBtn.disabled = false;
-                    isMapLoaded = true;
-                    
-                    hideMapLoading();
-                    
-                    // 加载地图插件
                     loadPlugins();
                 };
-                
                 script.onerror = function() {
-                    clearTimeout(timeout);
                     console.error('高德地图API加载失败');
-                    showMapError('地图API加载失败', '请检查API Key和安全密钥是否正确，或网络连接是否正常');
+                    showError('高德地图API加载失败，请检查API Key和安全密钥是否正确');
                     updateDebugInfo('高德地图API加载失败');
-                    
+                    loadMapBtn.textContent = '加载地图';
                     loadMapBtn.disabled = false;
-                    loadMapBtn.textContent = '重新加载地图';
-                    isMapLoaded = false;
                 };
-                
                 document.head.appendChild(script);
             }
             
             // 加载地图插件
             function loadPlugins() {
-                updateDebugInfo('开始加载点聚合插件...');
-                
                 const clusterScript = document.createElement('script');
                 clusterScript.type = 'text/javascript';
                 clusterScript.src = 'https://a.amap.com/jsapi_demos/static/demo-center/js/markerclusterer.js';
-                
                 clusterScript.onload = function() {
                     console.log('点聚合插件加载成功');
                     updateDebugInfo('点聚合插件加载成功');
-                    showSuccess('地图API加载成功，可以显示地图了');
+                    initMap();
                 };
-                
                 clusterScript.onerror = function() {
                     console.warn('点聚合插件加载失败，将使用普通标记');
                     updateDebugInfo('点聚合插件加载失败，将使用普通标记');
-                    showSuccess('地图API加载成功（点聚合功能不可用），可以显示地图了');
+                    initMap();
                 };
-                
                 document.head.appendChild(clusterScript);
             }
             
@@ -1872,15 +1556,24 @@
             // 开始绘制多边形
             function startPolygonDrawing() {
                 if (!isMapInitialized || !map) {
-                    showError('请先加载并显示地图');
+                    showError('请先加载地图');
                     return;
                 }
                 
                 if (!isMapVisible) {
-                    showError('请先显示地图');
-                    return;
+                    mapSection.style.display = 'block';
+                    isMapVisible = true;
+                    toggleMapBtn.textContent = '隐藏地图';
+                    setTimeout(() => {
+                        initPolygonDrawing();
+                    }, 300);
+                } else {
+                    initPolygonDrawing();
                 }
-                
+            }
+            
+            // 初始化多边形绘制
+            function initPolygonDrawing() {
                 if (isDrawingCircle) {
                     disableCircleDrawing();
                     drawCircleBtn.style.background = '#ff9800';
@@ -1957,7 +1650,7 @@
                         </div>
                         <div style="font-size: 11px; color: #666; margin-top: 8px;">提示: 双击完成绘制</div>
                     `;
-                    mapContainerWrapper.appendChild(controlPanel);
+                    mapSection.appendChild(controlPanel);
                     
                     document.getElementById('completePolygonBtn').addEventListener('click', completePolygonDrawing);
                     document.getElementById('cancelPolygonBtn').addEventListener('click', cancelPolygonDrawing);
@@ -2527,6 +2220,34 @@
             });
             
             // 地图控制按钮事件
+            toggleMapBtn.addEventListener('click', function() {
+                if (!isMapLoaded) {
+                    showError('请先加载地图');
+                    return;
+                }
+                
+                if (!isMapVisible) {
+                    if (!isMapInitialized) {
+                        initMap();
+                    }
+                    mapSection.style.display = 'block';
+                    isMapVisible = true;
+                    toggleMapBtn.textContent = '隐藏地图';
+                    updateDebugInfo('地图已显示');
+                    
+                    if (map) {
+                        setTimeout(() => {
+                            map.resize();
+                        }, 100);
+                    }
+                } else {
+                    mapSection.style.display = 'none';
+                    isMapVisible = false;
+                    toggleMapBtn.textContent = '显示地图';
+                    updateDebugInfo('地图已隐藏');
+                }
+            });
+            
             clearMarkersBtn.addEventListener('click', function() {
                 clearAllMarkers();
                 updateDebugInfo('所有地图标记已清除');
@@ -2598,30 +2319,22 @@
             // 初始化地图
             function initMap() {
                 if (!window.AMap) {
-                    showMapError('地图API未加载', '请先加载地图API');
+                    showError('高德地图API未加载，请先加载地图');
                     updateDebugInfo('地图初始化失败：API未加载');
                     return;
                 }
                 
-                showMapLoading('正在初始化地图...');
+                const location = document.getElementById('location').value.trim();
+                let center = [116.473168, 39.993015];
+                
+                if (location) {
+                    const locationParts = location.split(',');
+                    if (locationParts.length === 2) {
+                        center = [parseFloat(locationParts[0]), parseFloat(locationParts[1])];
+                    }
+                }
                 
                 try {
-                    const location = document.getElementById('location').value.trim();
-                    let center = [116.473168, 39.993015];
-                    
-                    if (location) {
-                        const locationParts = location.split(',');
-                        if (locationParts.length === 2) {
-                            const lng = parseFloat(locationParts[0]);
-                            const lat = parseFloat(locationParts[1]);
-                            if (!isNaN(lng) && !isNaN(lat)) {
-                                center = [lng, lat];
-                            }
-                        }
-                    }
-                    
-                    updateDebugInfo(`初始化地图，中心点: ${center[0]}, ${center[1]}`);
-                    
                     map = new AMap.Map('mapContainer', {
                         zoom: 14,
                         center: center,
@@ -2634,13 +2347,6 @@
                         zooms: [3, 20]
                     });
                     
-                    // 添加地图加载完成事件
-                    map.on('complete', function() {
-                        console.log('地图渲染完成');
-                        updateDebugInfo('地图渲染完成');
-                        hideMapLoading();
-                    });
-                    
                     addMapControls();
                     initBuildingLayer();
                     showCenterMarker();
@@ -2648,24 +2354,21 @@
                     
                     isMapInitialized = true;
                     isMapLoaded = true;
+                    toggleMapBtn.disabled = false;
+                    toggleMapBtn.textContent = '显示地图';
+                    loadMapBtn.textContent = '重新加载地图';
+                    loadMapBtn.disabled = false;
                     
-                    console.log('3D地图初始化成功');
+                    showSuccess('3D地图加载成功，可以显示地图了');
                     updateDebugInfo('3D地图初始化成功，所有控件已添加');
                     
-                    // 延迟隐藏加载状态，确保地图完全渲染
-                    setTimeout(() => {
-                        hideMapLoading();
-                    }, 1000);
-                    
+                    console.log('3D地图初始化成功');
                 } catch (error) {
                     console.error('地图初始化失败:', error);
-                    showMapError('地图初始化失败', error.message);
                     updateDebugInfo('地图初始化失败: ' + error.message);
-                    
-                    // 重置状态
-                    isMapInitialized = false;
-                    isMapLoaded = false;
-                    map = null;
+                    showError('地图初始化失败: ' + error.message);
+                    loadMapBtn.textContent = '加载地图';
+                    loadMapBtn.disabled = false;
                 }
             }
             
@@ -2830,12 +2533,7 @@
                 const locationParts = location.split(',');
                 if (locationParts.length !== 2) return;
                 
-                const lng = parseFloat(locationParts[0]);
-                const lat = parseFloat(locationParts[1]);
-                
-                if (isNaN(lng) || isNaN(lat)) return;
-                
-                const center = [lng, lat];
+                const center = [parseFloat(locationParts[0]), parseFloat(locationParts[1])];
                 
                 centerMarker = new AMap.Marker({
                     position: center,
@@ -2875,8 +2573,8 @@
                 clearSearchMarkers();
                 
                 pois.forEach((poi, index) => {
-                    const location = poi.location ? poi.location.split(',').map(Number) : null;
-                    if (!location || location.length !== 2 || isNaN(location[0]) || isNaN(location[1])) {
+                    const location = poi.location.split(',').map(Number);
+                    if (location.length !== 2 || isNaN(location[0]) || isNaN(location[1])) {
                         return;
                     }
                     
@@ -3024,12 +2722,12 @@
             
             // 切换全屏
             function toggleFullscreen() {
-                if (mapContainerWrapper.classList.contains('fullscreen')) {
-                    mapContainerWrapper.classList.remove('fullscreen');
+                if (mapSection.classList.contains('fullscreen')) {
+                    mapSection.classList.remove('fullscreen');
                     fullscreenBtn.textContent = '全屏';
                     updateDebugInfo('已退出全屏模式');
                 } else {
-                    mapContainerWrapper.classList.add('fullscreen');
+                    mapSection.classList.add('fullscreen');
                     fullscreenBtn.textContent = '退出全屏';
                     updateDebugInfo('已进入全屏模式');
                 }

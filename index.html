@@ -144,15 +144,23 @@
             margin-bottom: 10px;
             background: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-            font-size: 1.2rem;
-            color: #4361ee;
+            font-size: 1.8rem; /* 增大表情图标大小 */
             overflow: hidden;
         }
         
-        .bookmark-icon-square img {
-            width: 24px;
-            height: 24px;
+        /* 为不同域名设置不同背景色 */
+        .icon-emoji {
+            font-size: 1.8rem;
+            line-height: 1;
         }
+        
+        /* 图标背景颜色 */
+        .icon-bg-blue { background: linear-gradient(135deg, #4361ee, #3a0ca3); color: white; }
+        .icon-bg-orange { background: linear-gradient(135deg, #f9c74f, #f8961e); color: white; }
+        .icon-bg-green { background: linear-gradient(135deg, #4cc9f0, #4361ee); color: white; }
+        .icon-bg-purple { background: linear-gradient(135deg, #9d4edd, #560bad); color: white; }
+        .icon-bg-red { background: linear-gradient(135deg, #f72585, #b5179e); color: white; }
+        .icon-bg-teal { background: linear-gradient(135deg, #38b000, #2d936c); color: white; }
         
         .bookmark-name-square {
             font-weight: 600;
@@ -204,6 +212,11 @@
             .bookmark-icon-square {
                 width: 45px;
                 height: 45px;
+                font-size: 1.5rem;
+            }
+            
+            .icon-emoji {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -212,6 +225,7 @@
     <div class="container">
         <header>
             <h1><i class="fas fa-bookmark"></i> 书签导航</h1>
+            <p class="subtitle">快速访问常用网站和系统</p>
         </header>
         
         <main id="bookmarksContainer">
@@ -220,7 +234,7 @@
         </main>
         
         <footer class="footer">
-            <p>© 2023 书签导航 | 共 <span id="totalBookmarks">0</span> 个书签</p>
+            <p>© 2024 书签导航 | 共 <span id="totalBookmarks">0</span> 个书签</p>
         </footer>
     </div>
     
@@ -228,61 +242,188 @@
         // ============================================
         // 在这里添加新的网页链接！！！
         // 按照以下格式在相应的分类数组中添加新对象：
-        // {"name": "网站名称", "url": "https://example.com", "desc": "网站描述"}
+        // {"name": "网站名称", "url": "https://example.com", "desc": "网站描述", "icon": "🔧"}
+        // icon字段可选，如果不提供则会根据域名自动选择表情
         // ============================================
         
         // 书签数据
         const bookmarks = {
-            "📊 数据": [
-                {"name": "加盟管理服务中心", "url": "https://app.powerbi.com/reportEmbed?reportId=e3221df2-ffdc-4090-b476-d20a93a2a078&autoAuth=true&ctid=994d48cd-6859-415c-946b-e2424ca28937", "desc": "Power BI加盟管理报表"},
-                {"name": "早阳门店销售数据", "url": "https://app.powerbi.com/reportEmbed?reportId=806ad39f-aa08-49b4-8957-07278cd9cd13&autoAuth=true&ctid=994d48cd-6859-415c-946b-e2424ca28937", "desc": "Power BI门店销售报表"},
-                {"name": "高德地图搜索工具", "url": "https://zyf9957.github.io/gongkai/%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BE%E5%91%A8%E8%BE%B9%E6%90%9C%E7%B4%A2%E5%B7%A5%E5%85%B7.html"}
-                //
-                // 在这里添加更多Power BI书签...
+            "📊 数据报表": [
+                {"name": "加盟管理服务中心", "url": "https://app.powerbi.com/reportEmbed?reportId=e3221df2-ffdc-4090-b476-d20a93a2a078&autoAuth=true&ctid=994d48cd-6859-415c-946b-e2424ca28937", "desc": "Power BI加盟管理报表", "icon": "📈"},
+                {"name": "早阳门店销售数据", "url": "https://app.powerbi.com/reportEmbed?reportId=806ad39f-aa08-49b4-8957-07278cd9cd13&autoAuth=true&ctid=994d48cd-6859-415c-946b-e2424ca28937", "desc": "Power BI门店销售报表", "icon": "📊"},
+                {"name": "高德地图搜索工具", "url": "https://zyf9957.github.io/gongkai/%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BE%E5%91%A8%E8%BE%B9%E6%90%9C%E7%B4%A2%E5%B7%A5%E5%85%B7.html", "icon": "🗺️"}
+                // 在这里添加更多数据报表书签...
             ],
-            "📊 公司系统": [
-                {"name": "网规系统", "url": "https://xsite.online/#/login", "desc": "网规系统"},
-                {"name": "网规系统后台", "url": "https://datam.olmap.cn/admin/", "desc": "网规系统后台管理"},
-                {"name": "海康云眸", "url": "https://www.hik-cloud.com/safe-center/index.html#/login/retail?type=true", "desc": "海康云眸安全中心"},
-                {"name": "企迈", "url": "https://console.qmai.cn/biCenter/bivue/qmbiPage/qmbiCenter/report/1e9b6520282642a892c0b1fb9b677365?dashboardId=1e9b6520282642a892c0b1fb9b677365", "desc": "企迈BI报表中心"},
-                {"name": "DMS", "url": "https://hg.zaoyangfood.cn/pages/crmhome/index.html?menu=crm-home&page=crm-home&module=modules", "desc": "早阳食品DMS系统"},
-                {"name": "九阳豆业豆联网系统", "url": "https://iot.doujiang.com/user/login?redirect=%2Fdashboard%2Fanalysis", "desc": "九阳豆业物联网系统"},
-                {"name": "丰收商小助", "url": "https://samcform.zjnsjk.com/#/frame/28a46865651539cdd608e4c20fbda25fc1f5b123c44f69bff0e02d17be128e5df4b8f9be45d2d9827350085a4cae195f1f68236f404b69fb", "desc": "丰收商小助表单系统"},
-                {"name": "高德地图小程序", "url": "https://wia.amap.com/#/manage/maps?orgId=10012444080107938118", "desc": "高德地图管理后台"},
-                {"name": "加盟商管理系统", "url": "https://jms.zaoyangfood.cn:1445/app/dashboard", "desc": "加盟商管理系统"},
-                {"name": "美团外卖商家版", "url": "https://e.waimai.meituan.com/new_fe/login_gw#/login", "desc": "美团外卖商家版登录"}
+            "🏢 公司系统": [
+                {"name": "网规系统", "url": "https://xsite.online/#/login", "desc": "网规系统", "icon": "📐"},
+                {"name": "网规系统后台", "url": "https://datam.olmap.cn/admin/", "desc": "网规系统后台管理", "icon": "⚙️"},
+                {"name": "海康云眸", "url": "https://www.hik-cloud.com/safe-center/index.html#/login/retail?type=true", "desc": "海康云眸安全中心", "icon": "📹"},
+                {"name": "企迈", "url": "https://console.qmai.cn/biCenter/bivue/qmbiPage/qmbiCenter/report/1e9b6520282642a892c0b1fb9b677365?dashboardId=1e9b6520282642a892c0b1fb9b677365", "desc": "企迈BI报表中心", "icon": "📱"},
+                {"name": "DMS", "url": "https://hg.zaoyangfood.cn/pages/crmhome/index.html?menu=crm-home&page=crm-home&module=modules", "desc": "早阳食品DMS系统", "icon": "🍞"},
+                {"name": "九阳豆业豆联网", "url": "https://iot.doujiang.com/user/login?redirect=%2Fdashboard%2Fanalysis", "desc": "九阳豆业物联网系统", "icon": "🥛"},
+                {"name": "丰收商小助", "url": "https://samcform.zjnsjk.com/#/frame/28a46865651539cdd608e4c20fbda25fc1f5b123c44f69bff0e02d17be128e5df4b8f9be45d2d9827350085a4cae195f1f68236f404b69fb", "desc": "丰收商小助表单系统", "icon": "📋"},
+                {"name": "高德地图小程序", "url": "https://wia.amap.com/#/manage/maps?orgId=10012444080107938118", "desc": "高德地图管理后台", "icon": "📍"},
+                {"name": "加盟商管理系统", "url": "https://jms.zaoyangfood.cn:1445/app/dashboard", "desc": "加盟商管理系统", "icon": "🤝"},
+                {"name": "美团外卖商家版", "url": "https://e.waimai.meituan.com/new_fe/login_gw#/login", "desc": "美团外卖商家版登录", "icon": "🍔"},
+                {"name": "饿了么商家版", "url": "https://ka.shop.ele.me/", "desc": "饿了么商家版", "icon": "🍜"},
+                {"name": "抖音来客", "url": "https://fxg.jinritemai.com/", "desc": "抖音来客商家后台", "icon": "🎵"},
+                {"name": "企业微信", "url": "https://work.weixin.qq.com/", "desc": "企业微信", "icon": "💼"},
+                {"name": "钉钉", "url": "https://www.dingtalk.com/", "desc": "钉钉办公", "icon": "📌"},
+                {"name": "飞书", "url": "https://www.feishu.cn/", "desc": "飞书协作", "icon": "📚"}
                 // 在这里添加更多公司系统书签...
             ],
-
-            "📊 fine bi": [
-                {"name": "Fine BI", "url": "http://bi.zaoyangfood.cn:8012/webroot/decision#/analysis/own/subject/e9baf01d4d37405d846da94597981a0a/report/2dadf35b513f440aa513580dae7fab30", "desc": "Fine BI数据分析平台"},
-                {"name": "Fine Datalink", "url": "http://192.168.20.27/webroot/decision/login?origin=3de63df8-08da-4bf3-ae36-87c252dd1510#home", "desc": "Fine Datalink数据连接"}
+            "📈 Fine BI": [
+                {"name": "Fine BI", "url": "http://bi.zaoyangfood.cn:8012/webroot/decision#/analysis/own/subject/e9baf01d4d37405d846da94597981a0a/report/2dadf35b513f440aa513580dae7fab30", "desc": "Fine BI数据分析平台", "icon": "📊"},
+                {"name": "Fine Datalink", "url": "http://192.168.20.27/webroot/decision/login?origin=3de63df8-08da-4bf3-ae36-87c252dd1510#home", "desc": "Fine Datalink数据连接", "icon": "🔗"}
                 // 在这里添加更多Fine BI书签...
             ]
-            // 如果要添加新分类，请复制以下格式：
-            // "分类名称": [
-            //     {"name": "网站名称", "url": "https://example.com", "desc": "网站描述"},
-            //     // 更多书签...
-            // ],
         };
         
         // 分类图标和颜色映射
         const categoryStyles = {
-            "📊 公司系统": { icon: "📊", colorClass: "category-company", iconClass: "fas fa-building" },
-            "📊 power bi": { icon: "📊", colorClass: "category-powerbi", iconClass: "fas fa-chart-bar" },
-            "📊 fine bi": { icon: "📊", colorClass: "category-finebi", iconClass: "fas fa-chart-line" }
-            // 添加新分类的样式：
-            // "新分类名称": { icon: "🔧", colorClass: "category-company", iconClass: "fas fa-tools" },
+            "📊 数据报表": { icon: "📊", colorClass: "category-powerbi", iconClass: "fas fa-chart-bar" },
+            "🏢 公司系统": { icon: "🏢", colorClass: "category-company", iconClass: "fas fa-building" },
+            "📈 Fine BI": { icon: "📈", colorClass: "category-finebi", iconClass: "fas fa-chart-line" }
         };
         
-        // 获取网站图标URL（使用favicon服务）
-        function getFaviconUrl(url) {
+        // 域名到表情图标的映射
+        const domainToEmoji = {
+            'powerbi.com': '📊',
+            'github.com': '🐙',
+            'gitlab.com': '🦊',
+            'amap.com': '🗺️',
+            'google.com': '🔍',
+            'bing.com': '🔎',
+            'baidu.com': '🐼',
+            'weixin.qq.com': '💬',
+            'dingtalk.com': '📌',
+            'feishu.cn': '📚',
+            'meituan.com': '🍔',
+            'ele.me': '🍜',
+            'douyin.com': '🎵',
+            'bilibili.com': '📺',
+            'stackoverflow.com': '❓',
+            'microsoft.com': '🪟',
+            'apple.com': '🍎',
+            'python.org': '🐍',
+            'nodejs.org': '⬢',
+            'java.com': '☕',
+            'mysql.com': '🐬',
+            'mongodb.com': '🍃',
+            'redis.io': '🔴',
+            'docker.com': '🐳',
+            'kubernetes.io': '⚓',
+            'aws.amazon.com': '☁️',
+            'azure.com': '🔷',
+            'cloud.google.com': '🔶',
+            'alibabacloud.com': '👨‍💼'
+        };
+        
+        // 关键词到表情图标的映射
+        const keywordToEmoji = {
+            '登录': '🔐',
+            '管理': '⚙️',
+            '后台': '🖥️',
+            '系统': '🖥️',
+            '报表': '📊',
+            '数据': '📈',
+            '分析': '📊',
+            '地图': '🗺️',
+            '搜索': '🔍',
+            '工具': '🔧',
+            '设置': '⚙️',
+            '配置': '🛠️',
+            '开发': '💻',
+            '代码': '💾',
+            '文档': '📄',
+            '帮助': '❓',
+            '支持': '🆘',
+            '销售': '💰',
+            '财务': '💵',
+            '人力': '👥',
+            '资源': '📚',
+            '学习': '🎓',
+            '课程': '📖',
+            '视频': '🎬',
+            '音乐': '🎵',
+            '图片': '🖼️',
+            '文件': '📁',
+            '云': '☁️',
+            '存储': '💾',
+            '网络': '🌐',
+            '安全': '🔒',
+            '监控': '📹',
+            '邮件': '📧',
+            '消息': '💬',
+            '社交': '👥',
+            '购物': '🛒',
+            '外卖': '🍱',
+            '餐饮': '🍽️',
+            '旅行': '✈️',
+            '酒店': '🏨',
+            '交通': '🚗',
+            '健康': '🏥',
+            '运动': '⚽',
+            '娱乐': '🎮',
+            '游戏': '🎮'
+        };
+        
+        // 获取网站表情图标
+        function getWebsiteEmoji(url, name) {
+            try {
+                // 如果书签数据中已指定图标，则使用指定的图标
+                const bookmark = bookmarksArray.find(b => b.url === url);
+                if (bookmark && bookmark.icon) {
+                    return bookmark.icon;
+                }
+                
+                const domain = new URL(url).hostname;
+                
+                // 检查域名映射
+                for (const [key, emoji] of Object.entries(domainToEmoji)) {
+                    if (domain.includes(key)) {
+                        return emoji;
+                    }
+                }
+                
+                // 检查关键词映射
+                for (const [keyword, emoji] of Object.entries(keywordToEmoji)) {
+                    if (name.includes(keyword)) {
+                        return emoji;
+                    }
+                }
+                
+                // 默认图标
+                return '🔗';
+            } catch {
+                return '🌐'; // 如果URL无效，返回默认图标
+            }
+        }
+        
+        // 获取图标背景色类名
+        function getIconBgClass(url) {
+            const bgClasses = ['icon-bg-blue', 'icon-bg-orange', 'icon-bg-green', 'icon-bg-purple', 'icon-bg-red', 'icon-bg-teal'];
+            
             try {
                 const domain = new URL(url).hostname;
-                return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                // 根据域名生成一个简单的哈希值来选择背景色
+                let hash = 0;
+                for (let i = 0; i < domain.length; i++) {
+                    hash = domain.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const index = Math.abs(hash) % bgClasses.length;
+                return bgClasses[index];
             } catch {
-                return ''; // 如果URL无效，返回空
+                return bgClasses[0]; // 如果URL无效，返回第一个背景色
             }
+        }
+        
+        // 将bookmarks对象转换为数组以便查找
+        const bookmarksArray = [];
+        for (const category in bookmarks) {
+            bookmarks[category].forEach(item => {
+                bookmarksArray.push(item);
+            });
         }
         
         // 渲染书签
@@ -316,14 +457,18 @@
                         </div>
                     </div>
                     <div class="bookmarks-grid">
-                        ${items.map(item => `
-                            <a href="${item.url}" target="_blank" class="bookmark-square" title="${item.desc || item.name}">
-                                <div class="bookmark-icon-square">
-                                    <img src="${getFaviconUrl(item.url)}" alt="${item.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='🌐';" width="24" height="24">
-                                </div>
-                                <div class="bookmark-name-square">${item.name}</div>
-                            </a>
-                        `).join('')}
+                        ${items.map(item => {
+                            const emoji = getWebsiteEmoji(item.url, item.name);
+                            const bgClass = getIconBgClass(item.url);
+                            return `
+                                <a href="${item.url}" target="_blank" class="bookmark-square" title="${item.desc || item.name}">
+                                    <div class="bookmark-icon-square ${bgClass}">
+                                        <span class="icon-emoji">${emoji}</span>
+                                    </div>
+                                    <div class="bookmark-name-square">${item.name}</div>
+                                </a>
+                            `;
+                        }).join('')}
                     </div>
                 `;
                 
