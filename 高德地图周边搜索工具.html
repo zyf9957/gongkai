@@ -1117,8 +1117,8 @@
                     <div class="form-group">
                         <label for="types">地点类型 (可多选)</label>
                         <select id="types" multiple="multiple">
-                            <option value="050000">餐饮服务</option>
-                            <option value="060000">购物服务</option>
+                            <option value="050000" selected>餐饮服务</option>
+                            <option value="060000" selected>购物服务</option>
                             <option value="080000">体育休闲服务</option>
                             <option value="090000">医疗保健服务</option>
                             <option value="100000">住宿服务</option>
@@ -1129,7 +1129,7 @@
                     
                     <div class="form-group">
                         <label for="radius">搜索半径 (米)</label>
-                        <input type="number" id="radius" value="500" min="0" max="50000">
+                        <input type="number" id="radius" value="300" min="0" max="50000">
                         <div class="help-text">取值范围: 0-50000，超出按默认值5000计算</div>
                     </div>
                     
