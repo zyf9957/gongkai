@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>早阳数据</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #f5f7fb;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+
+        /* ===== 侧边栏 ===== */
+        .sidebar-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 999;
+            display: flex;
+            transition: all 0.4s ease;
+        }
+        .sidebar {
+            width: 260px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+        .sidebar-wrap.collapsed .sidebar {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .toggle-side-btn {
+            width: 36px;
+            height: 100px;
+            margin: auto 0;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .toggle-side-btn:hover {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+        .relogin-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: #374151;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .relogin-btn:hover {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+        }
+        .report-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .switch-btn {
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #4b5563;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-weight: 500;
+        }
+        .switch-btn:hover {
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+        }
+        .switch-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+            border-color: #1d4ed8;
+            box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
+        }
+
+        /* ===== 加载遮罩 ===== */
+        .loading-mask {
+            position: fixed;
+            inset: 0;
+            background: rgba(245, 247, 251, 0.92);
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .loading-mask.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== iframe ===== */
+        #bi-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* ===== 引导浮层 ===== */
+        .reopen-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .reopen-overlay.show {
+            display: flex;
+        }
+        .reopen-card {
+            background: #ffffff;
+            padding: 40px 48px;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+            animation: fadeUp 0.4s ease;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .reopen-card .icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+        .reopen-card h2 {
+            font-size: 22px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .reopen-card p {
+            color: #4b5563;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .reopen-card .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .reopen-card .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .reopen-card .btn-success {
+            background: #22c55e;
+            color: #fff;
+        }
+        .reopen-card .btn-success:hover {
+            background: #16a34a;
+        }
+        .reopen-card .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+        .reopen-card .btn-danger:hover {
+            background: #dc2626;
+        }
+        .reopen-card .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .reopen-card .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .reopen-card .hint {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .sidebar { width: 200px; padding: 16px 12px; }
+            .switch-btn, .relogin-btn { font-size: 13px; padding: 10px 12px; }
+            .toggle-side-btn { width: 28px; height: 80px; font-size: 12px; }
+            .reopen-card { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 侧边栏 ===== -->
+    <div class="sidebar-wrap" id="sidebarWrap">
+        <div class="sidebar">
+            <button class="relogin-btn" id="reloginBtn">🔑 重新登录（切换账号）</button>
+            <div class="report-buttons">
+                <button class="switch-btn active" data-index="0">加盟管理服务中心</button>
+                <button class="switch-btn" data-index="1">早阳门店销售数据</button>
+                <button class="switch-btn" data-index="2">订货物料维度数据</button>
+            </div>
+        </div>
+        <button class="toggle-side-btn" id="toggleSideBtn">◀</button>
+    </div>
+
+    <!-- ===== 加载遮罩 ===== -->
+    <div class="loading-mask hidden" id="loading">
+        <div class="loader"></div>
+    </div>
+
+    <!-- ===== 引导浮层 ===== -->
+    <div class="reopen-overlay" id="reopenOverlay">
+        <div class="reopen-card">
+            <div class="icon">🔐</div>
+            <h2>准备切换账号</h2>
+            <p>
+                请按以下步骤操作：<br />
+                ① 点击下方按钮打开注销窗口<br />
+                ② 在注销页面点击“注销”或“退出”<br />
+                ③ 看到“您已注销帐户”后，关闭该窗口<br />
+                ④ 回到本页面，点击“关闭页面”按钮<br />
+                ⑤ 然后重新打开此页面登录新账号
+            </p>
+            <div class="btn-group">
+                <button class="btn btn-success" id="openLogoutBtn">📤 打开注销窗口</button>
+                <button class="btn btn-danger" id="closePageBtn">❌ 关闭页面（最后一步）</button>
+                <button class="btn btn-secondary" id="manualHintBtn">稍后手动操作</button>
+            </div>
+            <div class="hint">
+                💡 关闭页面后，请重新打开此 HTML 文件，即可选择新账号登录。
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 报表 iframe ===== -->
+    <iframe id="bi-iframe"></iframe>
+
+    <script>
+        // ============================================================
+        // 1. 配置
+        // ============================================================
+        const TENANT_ID = "994d48cd-6859-415c-946b-e2424ca28937";
+        const BASE_REPORT_URLS = [
+            `https://app.powerbi.com/reportEmbed?reportId=e3221df2-ffdc-4090-b476-d20a93a2a078&autoAuth=true&ctid=${TENANT_ID}`,
+            `https://app.powerbi.com/reportEmbed?reportId=806ad39f-aa08-49b4-8957-07278cd9cd13&autoAuth=true&ctid=${TENANT_ID}`,
+            `https://app.powerbi.com/reportEmbed?reportId=14bb498b-0172-4cd2-9463-c078a72e464d&autoAuth=true&ctid=${TENANT_ID}`
+        ];
+
+        // ============================================================
+        // 2. DOM 引用
+        // ============================================================
+        const iframe = document.getElementById("bi-iframe");
+        const loading = document.getElementById("loading");
+        const btnList = document.querySelectorAll(".switch-btn");
+        const sidebarWrap = document.getElementById("sidebarWrap");
+        const toggleBtn = document.getElementById("toggleSideBtn");
+        const reloginBtn = document.getElementById("reloginBtn");
+        const reopenOverlay = document.getElementById("reopenOverlay");
+        const openLogoutBtn = document.getElementById("openLogoutBtn");
+        const closePageBtn = document.getElementById("closePageBtn");
+        const manualHintBtn = document.getElementById("manualHintBtn");
+
+        let currentIndex = 0;
+
+        // ============================================================
+        // 3. 侧边栏折叠
+        // ============================================================
+        let collapsed = false;
+        toggleBtn.addEventListener("click", () => {
+            collapsed = !collapsed;
+            sidebarWrap.classList.toggle("collapsed", collapsed);
+            toggleBtn.innerText = collapsed ? "▶" : "◀";
+        });
+
+        // ============================================================
+        // 4. 加载控制
+        // ============================================================
+        function showLoading() { loading.classList.remove("hidden"); }
+        function hideLoading() { loading.classList.add("hidden"); }
+
+        function loadReport(index) {
+            if (index === currentIndex && iframe.src === BASE_REPORT_URLS[index]) return;
+            showLoading();
+            currentIndex = index;
+            iframe.src = BASE_REPORT_URLS[index];
+        }
+
+        iframe.onload = () => hideLoading();
+        iframe.onerror = () => hideLoading();
+
+        // 初始加载（普通 URL）
+        iframe.src = BASE_REPORT_URLS[0];
+
+        // 切换报表
+        btnList.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idx = Number(btn.dataset.index);
+                if (idx === currentIndex) return;
+                btnList.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                loadReport(idx);
+            });
+        });
+
+        // ============================================================
+        // 5. 超强清除缓存
+        // ============================================================
+        async function clearAllCache() {
+            try { localStorage.clear(); } catch (_) {}
+            try { sessionStorage.clear(); } catch (_) {}
+
+            const cookieNames = new Set();
+            document.cookie.split(";").forEach(c => {
+                const name = c.split("=")[0].trim();
+                if (name) cookieNames.add(name);
+            });
+            const extraCookies = [
+                "ESTSAUTHPERSISTENT", "ESTSAUTH", "ESTSAUTHLIGHT", "ESTSAUTHN", "ESTSAUTHV2",
+                "MSISAuth", "MSISAuthenticated", "MSISLoopDetectionCookie", "OAuthAppSession",
+                "AADSSO", "SignInStateCookie", "ccsst", "x-ms-gateway-slice", "stsservicecookie",
+                "ai_session", "ai_user", "login_hint", "sid", "RPSSecAuth", "MSPAuth",
+                "MSPProf", "MSPOK", "MSNRPSAuth", "MSNMRPSAuth",
+                "PBIAuth", "PowerBIUser", "pbi-saas-auth", "pbi-saas-user",
+                "ARRAffinity", "ARRAffinitySameSite"
+            ];
+            extraCookies.forEach(name => cookieNames.add(name));
+
+            const domains = [
+                "", ".login.microsoftonline.com", ".microsoftonline.com", ".microsoft.com",
+                ".live.com", ".outlook.com", ".powerbi.com", ".app.powerbi.com",
+                ".msappproxy.net", ".azure.com"
+            ];
+            const paths = ["/", "/common", "/oauth2", "/reports", "/api"];
+
+            cookieNames.forEach(name => {
+                domains.forEach(domain => {
+                    paths.forEach(path => {
+                        let cookieStr = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}`;
+                        if (domain) cookieStr += `; domain=${domain}`;
+                        document.cookie = cookieStr;
+                        document.cookie = cookieStr + "; Secure";
+                        document.cookie = cookieStr + "; SameSite=None; Secure";
+                    });
+                });
+            });
+
+            if ('caches' in window) {
+                try {
+                    const keys = await caches.keys();
+                    for (const key of keys) {
+                        await caches.delete(key);
+                    }
+                } catch (_) {}
+            }
+
+            if ('indexedDB' in window) {
+                try {
+                    const dbs = await indexedDB.databases?.() || [];
+                    for (const db of dbs) {
+                        if (db.name) {
+                            try { indexedDB.deleteDatabase(db.name); } catch (_) {}
+                        }
+                    }
+                } catch (_) {}
+            }
+
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const reg of registrations) {
+                        await reg.unregister();
+                    }
+                } catch (_) {}
+            }
+
+            if (navigator.credentials && navigator.credentials.preventSilentAccess) {
+                try { await navigator.credentials.preventSilentAccess(); } catch (_) {}
+            }
+        }
+
+        // ============================================================
+        // 6. 重新登录流程
+        // ============================================================
+        async function performLogout() {
+            showLoading();
+            await clearAllCache();
+            hideLoading();
+
+            // 显示引导浮层
+            reopenOverlay.classList.add("show");
+        }
+
+        // ============================================================
+        // 7. 浮层按钮事件
+        // ============================================================
+
+        // 7-A. 打开注销窗口
+        openLogoutBtn.addEventListener("click", () => {
+            const logoutUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/logout`;
+            const logoutWindow = window.open(logoutUrl, "_blank");
+            if (!logoutWindow || logoutWindow.closed || typeof logoutWindow.closed === 'undefined') {
+                alert("无法自动打开窗口，请手动复制以下链接到新标签页中打开：\n\n" + logoutUrl);
+            } else {
+                alert("已打开注销窗口。请完成注销（点击“注销”或“退出”），然后关闭该窗口，最后点击“关闭页面”按钮。");
+            }
+        });
+
+        // 7-B. 关闭页面（最后一步）
+        closePageBtn.addEventListener("click", () => {
+            // 先尝试关闭窗口
+            window.close();
+            // 如果关闭失败，提示用户手动关闭
+            setTimeout(() => {
+                if (!window.closed) {
+                    alert("无法自动关闭页面，请手动关闭此标签页。");
+                }
+            }, 300);
+        });
+
+        // 7-C. 手动操作（隐藏浮层，供用户自行操作）
+        manualHintBtn.addEventListener("click", () => {
+            reopenOverlay.classList.remove("show");
+            alert("请手动关闭标签页后重新打开，或点击“打开注销窗口”和“关闭页面”按钮。");
+        });
+
+        // ============================================================
+        // 8. 监听重新登录按钮
+        // ============================================================
+        reloginBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            performLogout();
+        });
+
+        // ============================================================
+        // 9. 其他
+        // ============================================================
+        window.addEventListener("load", () => {
+            hideLoading();
+        });
+
+        setTimeout(hideLoading, 15000);
+
+        // 快捷键 Ctrl+Shift+L
+        document.addEventListener("keydown", (e) => {
+            if (e.ctrlKey && e.shiftKey && (e.key === "L" || e.key === "l")) {
+                e.preventDefault();
+                performLogout();
+            }
+        });
+
+        console.log("✅ 早阳大屏已启动 | 重新登录 = 清除缓存 → 引导注销 → 关闭页面 → 重新打开");
+        console.log("📌 快捷键: Ctrl+Shift+L 快速重新登录");
+    </script>
+</body>
+</html>
