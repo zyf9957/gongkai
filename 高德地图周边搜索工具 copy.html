@@ -62,8 +62,6 @@
             flex: 2;
             min-width: 300px;
             padding: 15px;
-            display: flex;
-            flex-direction: column;
         }
         
         .form-group {
@@ -182,14 +180,6 @@
             color: #673ab7 !important;
         }
         
-        .poi-item.district-result-item {
-            border-left: 4px solid #0097a7 !important;
-        }
-        
-        .poi-item.district-result-item .poi-name {
-            color: #00838f !important;
-        }
-        
         .poi-item:last-child {
             border-bottom: none;
         }
@@ -207,15 +197,13 @@
         
         /* 地图容器样式 */
         .map-section {
-            margin: 0 0 20px 0;
+            margin-top: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: hidden;
             height: 500px;
             display: none;
             position: relative;
-            order: -1; /* 置于右列顶部，即「右上」 */
-            flex-shrink: 0;
         }
         
         #mapContainer {
@@ -676,61 +664,6 @@
             flex: 1;
         }
         
-        /* 安全密钥区块 */
-        .security-section {
-            background: #f4f7fb;
-            border: 1px solid #cfd8e3;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .console-link {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #1e88e5;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 13px;
-            padding: 0 10px;
-            height: 38px;
-            white-space: nowrap;
-            transition: background 0.2s;
-        }
-        
-        .console-link:hover {
-            background: #1565c0;
-        }
-        
-        /* 密钥分组配色：地图Key + 安全密钥 为一组(青绿)，搜索Key 单独一组(橙) */
-        input.key-display {
-            border: 2px solid #009688;
-            background-color: #f0f7f6;
-        }
-        input.key-display:focus {
-            outline: none;
-            border-color: #00796b;
-            box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.18);
-        }
-        input.key-search {
-            border: 2px solid #fb8c00;
-            background-color: #fff6ed;
-        }
-        input.key-search:focus {
-            outline: none;
-            border-color: #ef6c00;
-            box-shadow: 0 0 0 2px rgba(251, 140, 0, 0.18);
-        }
-        .label-key-display {
-            color: #00796b !important;
-        }
-        .label-key-search {
-            color: #e65100 !important;
-        }
-        
         /* 全屏样式 */
         .fullscreen-btn {
             position: absolute;
@@ -1064,12 +997,6 @@
             border: 1px solid #ce93d8;
         }
         
-        /* 行政区搜索面板样式 */
-        .district-search-panel {
-            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
-            border: 1px solid #4dd0e1;
-        }
-        
         /* 修复控件位置重叠问题 - 进一步调整控件位置 */
         .amap-hawk-eye {
             right: 10px !important;
@@ -1116,45 +1043,27 @@
         
         <div class="content">
             <div class="form-section">
-                <!-- 地图显示密钥 -->
+                <!-- 地图API密钥和安全密钥输入 -->
                 <div class="form-group">
-                    <label for="mapApiKey" class="label-key-display">高德地图API Key (用于显示地图) *</label>
+                    <label for="mapApiKey">高德地图API Key (用于显示地图) *</label>
                     <div class="api-key-group">
-                        <input type="text" id="mapApiKey" class="key-display" placeholder="请输入高德地图JavaScript API Key" value="">
+                        <input type="text" id="mapApiKey" placeholder="请输入高德地图JavaScript API Key" value="">
                         <button id="loadMapBtn">加载地图</button>
                         <button id="toggleMapBtn" class="map-toggle-btn" disabled>显示地图</button>
                     </div>
                     <div class="help-text">请确保您有高德地图JavaScript API权限，支持3D地图功能</div>
-                </div>
-                
-                <!-- 安全密钥区块 -->
-                <div class="security-section">
-                    <h3 style="margin-bottom: 12px; color: #37474f;">API 密钥设置</h3>
-                    <div class="help-text" style="margin-bottom: 12px;">颜色说明：<span style="color:#00796b;font-weight:bold;">青绿色</span> = 地图 Key + 安全密钥（配合使用，一组）；<span style="color:#e65100;font-weight:bold;">橙色</span> = 搜索 Key（单独一组）。</div>
                     
-                    <div class="form-group">
-                        <label for="securityKey" class="label-key-display">安全密钥 (Security Key)</label>
-                        <div class="security-key-group">
-                            <input type="text" id="securityKey" class="key-display" placeholder="请输入安全密钥 (可选)" value="">
-                        </div>
-                        <div class="help-text">如果您的API Key配置了安全密钥，请在此输入</div>
+                    <label for="securityKey" style="margin-top: 10px;">安全密钥 (Security Key)</label>
+                    <div class="security-key-group">
+                        <input type="text" id="securityKey" placeholder="请输入安全密钥 (可选)" value="">
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="searchApiKey" class="label-key-search">高德Web服务API Key (用于搜索) *</label>
-                        <div class="api-key-group">
-                            <input type="text" id="searchApiKey" class="key-search" placeholder="请输入高德Web服务API Key">
-                            <a id="amapConsoleLink" href="https://console.amap.com/dev/key/app" target="_blank" rel="noopener" class="console-link">高德控制台获取</a>
-                        </div>
-                        <div class="help-text">请确保您有高德地图Web服务API权限（圆形/多边形/行政区搜索共用此 Key）</div>
-                    </div>
+                    <div class="help-text">如果您的API Key配置了安全密钥，请在此输入</div>
                 </div>
                 
                 <!-- 搜索类型切换标签 -->
                 <div class="search-type-tabs">
                     <button id="circularSearchTab" class="search-type-tab active">圆形搜索</button>
                     <button id="polygonSearchTab" class="search-type-tab">多边形搜索</button>
-                    <button id="districtSearchTab" class="search-type-tab">行政区搜索</button>
                 </div>
                 
                 <!-- 圆形搜索面板 -->
@@ -1163,6 +1072,12 @@
 
                     <button id="searchBtn">开始圆形搜索</button>
 
+                    <div class="form-group">
+                        <label for="apiKey">高德Web服务API Key (用于搜索) *</label>
+                        <input type="text" id="apiKey" placeholder="请输入高德Web服务API Key" value="">
+                        <div class="help-text">请确保您有高德地图Web服务API权限</div>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="address">地址转坐标</label>
                         <div class="location-group">
@@ -1247,6 +1162,12 @@
                     </div>
                     
                     <div class="form-group">
+                        <label for="polygonApiKey">高德Web服务API Key (用于搜索) *</label>
+                        <input type="text" id="polygonApiKey" placeholder="请输入高德Web服务API Key" value="bf4da3ecd21e50fc84e32297bf66e944">
+                        <div class="help-text">请确保您有高德地图Web服务API权限</div>
+                    </div>
+                    
+                    <div class="form-group">
                         <label for="polygonKeywords">关键词</label>
                         <input type="text" id="polygonKeywords" placeholder="如: 餐厅、酒店等">
                         <div class="help-text">可选，用于筛选特定名称的地点</div>
@@ -1301,78 +1222,6 @@
                         <div id="polygonInstruction" class="polygon-instruction">点击"开始绘制多边形"按钮，在地图上绘制多边形区域</div>
                         <div id="polygonPointCount" class="polygon-point-count" style="display: none;">已绘制: <span id="pointCount">0</span> 个顶点</div>
                         <div id="polygonAreaInfo" class="polygon-area-info" style="display: none;">多边形面积: <span id="areaValue">0</span> km²</div>
-                    </div>
-                </div>
-                
-                <!-- 行政区搜索面板 -->
-                <div id="districtSearchPanel" class="search-panel district-search-panel">
-                    <h3 style="margin-bottom: 15px; color: #00838f;">行政区搜索设置</h3>
-
-                    <button id="searchDistrictBtn">开始行政区搜索</button>
-
-                    <div class="form-group">
-                        <label for="districtCity">城市（省/地级市/区县）*</label>
-                        <input type="text" id="districtCity" placeholder="如: 浙江省、杭州市、西湖区">
-                        <div class="help-text">输入省、地级市或区县级名称，用于在指定区域内检索POI</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="districtKeywords">关键词</label>
-                        <input type="text" id="districtKeywords" placeholder="如: 餐厅、酒店等">
-                        <div class="help-text">可选，用于筛选特定名称的地点；留空则按类型检索</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="districtTypes">地点类型 (可多选)</label>
-                        <select id="districtTypes" multiple="multiple">
-                            <option value="050000">餐饮服务</option>
-                            <option value="060000">购物服务</option>
-                            <option value="060700">购物服务-综合市场</option>
-                            <option value="070000">生活服务</option>
-                            <option value="080000">体育休闲服务</option>
-                            <option value="090000">医疗保健服务</option>
-                            <option value="100000">住宿服务</option>
-                            <option value="110000">风景名胜</option>
-                            <option value="120000">商务住宅</option>
-                            <option value="130000">政府机构</option>
-                            <option value="140000">科教文化服务</option>
-                            <option value="150000">交通设施</option>
-                            <option value="160000">金融保险</option>
-                            <option value="170000">公司企业</option>
-                            <option value="190000">道路附属设施</option>
-                            <option value="200000">地名地址信息</option>
-                        </select>
-                        <div class="help-text">可多选，不选则使用默认类型</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="districtCityLimit">是否严格限定在该城市范围内</label>
-                        <div class="request-delay">
-                            <input type="checkbox" id="districtCityLimit" style="width: auto;">
-                            <span>勾选后仅返回该城市内的结果（citylimit=true）</span>
-                        </div>
-                        <div class="help-text">省/全国性检索建议不勾选；精确到市/区时可勾选以排除同名地点</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="districtResultLimit">结果数量限制</label>
-                        <select id="districtResultLimit">
-                            <option value="100">100</option>
-                            <option value="200" selected>200</option>
-                            <option value="500">500</option>
-                            <option value="1000">1000</option>
-                            <option value="2000">2000</option>
-                        </select>
-                        <div class="help-text">控制最多返回的结果数量</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="districtRequestDelay">请求延时 (毫秒)</label>
-                        <div class="request-delay">
-                            <input type="number" id="districtRequestDelay" value="1000" min="100" max="5000">
-                            <span>毫秒 (建议500-1000)</span>
-                        </div>
-                        <div class="help-text">设置请求间隔，避免超出API限制</div>
                     </div>
                 </div>
                 
@@ -1497,11 +1346,8 @@
             // 搜索面板切换相关元素
             const circularSearchTab = document.getElementById('circularSearchTab');
             const polygonSearchTab = document.getElementById('polygonSearchTab');
-            const districtSearchTab = document.getElementById('districtSearchTab');
             const circularSearchPanel = document.getElementById('circularSearchPanel');
             const polygonSearchPanel = document.getElementById('polygonSearchPanel');
-            const districtSearchPanel = document.getElementById('districtSearchPanel');
-            const searchDistrictBtn = document.getElementById('searchDistrictBtn');
             
             // 地图相关元素
             const mapSection = document.getElementById('mapSection');
@@ -1556,8 +1402,6 @@
             let currentConvertedLocation = '';
             let csvContent = '';
             let isSearching = false;
-            let currentSearchType = 'circular'; // circular | polygon | district
-            let currentKeyword = ''; // 当前搜索使用的关键词，用于导出 CSV
             
             // 地图相关变量
             let map = null;
@@ -1587,25 +1431,18 @@
             let mouseTool = null; // 鼠标工具
             
             // 搜索面板切换功能
-            function switchSearchPanel(activeTab, activePanel) {
-                const allTabs = [circularSearchTab, polygonSearchTab, districtSearchTab];
-                const allPanels = [circularSearchPanel, polygonSearchPanel, districtSearchPanel];
-                allTabs.forEach(t => t.classList.remove('active'));
-                allPanels.forEach(p => p.classList.remove('active'));
-                activeTab.classList.add('active');
-                activePanel.classList.add('active');
-            }
-            
             circularSearchTab.addEventListener('click', function() {
-                switchSearchPanel(circularSearchTab, circularSearchPanel);
+                circularSearchTab.classList.add('active');
+                polygonSearchTab.classList.remove('active');
+                circularSearchPanel.classList.add('active');
+                polygonSearchPanel.classList.remove('active');
             });
             
             polygonSearchTab.addEventListener('click', function() {
-                switchSearchPanel(polygonSearchTab, polygonSearchPanel);
-            });
-            
-            districtSearchTab.addEventListener('click', function() {
-                switchSearchPanel(districtSearchTab, districtSearchPanel);
+                polygonSearchTab.classList.add('active');
+                circularSearchTab.classList.remove('active');
+                polygonSearchPanel.classList.add('active');
+                circularSearchPanel.classList.remove('active');
             });
             
             // 添加调试按钮事件
@@ -2065,7 +1902,7 @@
                     return;
                 }
                 
-                const apiKey = document.getElementById('searchApiKey').value.trim();
+                const apiKey = document.getElementById('polygonApiKey').value.trim();
                 if (!apiKey) {
                     showError('请输入高德Web服务API Key');
                     return;
@@ -2074,7 +1911,6 @@
                 resetUI();
                 searchResults = [];
                 isSearching = true;
-                currentSearchType = 'polygon';
                 
                 status.textContent = '开始多边形搜索...';
                 progress.style.width = '0%';
@@ -2086,7 +1922,6 @@
                     types: $('#polygonTypes').val() || [],
                     resultLimit: parseInt(document.getElementById('polygonResultLimit').value)
                 };
-                currentKeyword = params.keywords;
                 
                 updateDebugInfo(`开始多边形搜索，参数: ${JSON.stringify({
                     ...params,
@@ -2281,197 +2116,6 @@
                 map.setFitView();
             }
             
-            // ===================== 行政区搜索相关功能 =====================
-            
-            // 初始化行政区搜索界面
-            function initDistrictSearchUI() {
-                $('#districtTypes').select2({
-                    placeholder: "请选择地点类型 (不选则使用默认)",
-                    allowClear: true,
-                    width: '100%'
-                });
-                
-                bindDistrictEvents();
-                console.log('行政区搜索界面初始化完成');
-            }
-            
-            // 绑定行政区搜索事件
-            function bindDistrictEvents() {
-                searchDistrictBtn.addEventListener('click', searchDistrict);
-            }
-            
-            // 行政区搜索
-            async function searchDistrict() {
-                if (isSearching) {
-                    showError('搜索正在进行中，请等待完成');
-                    return;
-                }
-                
-                const apiKey = document.getElementById('searchApiKey').value.trim();
-                const city = document.getElementById('districtCity').value.trim();
-                
-                if (!apiKey) {
-                    showError('请输入高德Web服务API Key');
-                    return;
-                }
-                
-                if (!city) {
-                    showError('请输入城市（省/地级市/区县）');
-                    return;
-                }
-                
-                resetUI();
-                searchResults = [];
-                isSearching = true;
-                currentSearchType = 'district';
-                
-                status.textContent = '开始行政区搜索...';
-                progress.style.width = '0%';
-                
-                const params = {
-                    apiKey: apiKey,
-                    city: city,
-                    keywords: document.getElementById('districtKeywords').value.trim(),
-                    types: $('#districtTypes').val() || [],
-                    cityLimit: document.getElementById('districtCityLimit').checked,
-                    resultLimit: parseInt(document.getElementById('districtResultLimit').value) || 200,
-                    requestDelay: parseInt(document.getElementById('districtRequestDelay').value) || 1000
-                };
-                currentKeyword = params.keywords;
-                
-                updateDebugInfo(`开始行政区搜索，参数: ${JSON.stringify({
-                    ...params,
-                    apiKey: '***'
-                })}`);
-                
-                try {
-                    const pois = await performDistrictSearch(params);
-                    
-                    if (pois.length > 0) {
-                        searchResults = pois;
-                        updateResultDisplay(searchResults);
-                        addMarkersToMap(searchResults);
-                        downloadBtn.disabled = false;
-                        copyBtn.disabled = false;
-                        exportBtn.disabled = false;
-                        csvContent = generateCSVContent(searchResults);
-                        status.textContent = `行政区搜索完成! 找到 ${pois.length} 个POI`;
-                        showSuccess(`行政区搜索完成，找到 ${pois.length} 个POI`);
-                        updateDebugInfo(`行政区搜索完成，找到 ${pois.length} 个POI`);
-                    } else {
-                        status.textContent = '行政区搜索完成，未找到任何数据';
-                        showError('行政区搜索完成，未找到任何数据');
-                        updateDebugInfo('行政区搜索完成，未找到数据');
-                    }
-                    
-                } catch (error) {
-                    const errorMsg = `行政区搜索失败: ${error.message}`;
-                    showError(errorMsg);
-                    updateDebugInfo(errorMsg);
-                    console.error('行政区搜索错误:', error);
-                } finally {
-                    isSearching = false;
-                    progress.style.width = '100%';
-                }
-            }
-            
-            // 执行行政区搜索（分页获取）
-            async function performDistrictSearch(params) {
-                const allPois = [];
-                let page = 1;
-                const maxPages = Math.ceil(params.resultLimit / 25);
-                const requestDelay = params.requestDelay;
-                
-                while (page <= maxPages) {
-                    status.textContent = `正在获取第 ${page}/${maxPages} 页数据...`;
-                    progress.style.width = `${(page / maxPages) * 100}%`;
-                    updateDebugInfo(`正在请求第 ${page} 页行政区数据`);
-                    
-                    try {
-                        const pageData = await fetchDistrictPageData(params, page);
-                        
-                        if (!pageData) {
-                            updateDebugInfo(`第 ${page} 页请求失败`);
-                            break;
-                        }
-                        
-                        if (pageData.status !== '1') {
-                            const errorMsg = pageData.info || '未知错误';
-                            updateDebugInfo(`第 ${page} 页请求失败: ${errorMsg}`);
-                            
-                            if (errorMsg.includes('访问已超出日访问量') || errorMsg.includes('INVALID_USER_KEY')) {
-                                throw new Error(`API错误: ${errorMsg}`);
-                            }
-                            break;
-                        }
-                        
-                        if (pageData.pois && pageData.pois.length > 0) {
-                            allPois.push(...pageData.pois);
-                            updateDebugInfo(`第 ${page} 页获取到 ${pageData.pois.length} 条数据`);
-                        } else {
-                            updateDebugInfo(`第 ${page} 页无数据`);
-                            break;
-                        }
-                        
-                        if (pageData.pois.length < 25) {
-                            updateDebugInfo(`第 ${page} 页数据不足25条，结束搜索`);
-                            break;
-                        }
-                        
-                        if (allPois.length >= params.resultLimit) {
-                            allPois.splice(params.resultLimit);
-                            updateDebugInfo(`已达到结果限制 ${params.resultLimit}`);
-                            break;
-                        }
-                        
-                        page++;
-                        updateDebugInfo(`等待 ${requestDelay}ms 后请求下一页`);
-                        await new Promise(resolve => setTimeout(resolve, requestDelay));
-                        
-                    } catch (error) {
-                        updateDebugInfo(`第 ${page} 页请求异常: ${error.message}`);
-                        throw error;
-                    }
-                }
-                
-                return allPois;
-            }
-            
-            // 获取行政区搜索的单页数据
-            async function fetchDistrictPageData(params, pageNum) {
-                const url = 'https://restapi.amap.com/v3/place/text';
-                const requestParams = new URLSearchParams({
-                    key: params.apiKey,
-                    offset: 25,
-                    page: pageNum,
-                    extensions: 'all',
-                    output: 'json'
-                });
-                
-                if (params.keywords) requestParams.append('keywords', params.keywords);
-                if (params.types && params.types.length > 0) requestParams.append('types', params.types.join('|'));
-                if (params.city) requestParams.append('city', params.city);
-                if (params.cityLimit) requestParams.append('citylimit', 'true');
-                
-                const fullUrl = `${url}?${requestParams.toString()}`;
-                updateDebugInfo(`行政区请求URL: ${fullUrl.replace(params.apiKey, '***')}`);
-                
-                try {
-                    const response = await fetch(fullUrl);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP错误: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error('行政区请求失败:', error);
-                    updateDebugInfo(`行政区请求失败: ${error.message}`);
-                    return null;
-                }
-            }
-            
             // 地图工具按钮事件
             satelliteBtn.addEventListener('click', function() {
                 if (isMapInitialized && map) {
@@ -2628,7 +2272,7 @@
             // 地址转坐标按钮事件
             convertBtn.addEventListener('click', function() {
                 const address = addressInput.value.trim();
-                const apiKey = document.getElementById('searchApiKey').value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
                 
                 if (!address) {
                     showError('请输入地址');
@@ -2653,7 +2297,7 @@
             addressInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 const address = addressInput.value.trim();
-                const apiKey = document.getElementById('searchApiKey').value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
                 
                 if (address.length < 2 || !apiKey) {
                     addressResults.style.display = 'none';
@@ -3366,7 +3010,7 @@
                     return;
                 }
                 
-                const apiKey = document.getElementById('searchApiKey').value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
                 const location = document.getElementById('location').value.trim();
                 
                 if (!apiKey) {
@@ -3391,13 +3035,11 @@
                 resetUI();
                 searchResults = [];
                 isSearching = true;
-                currentSearchType = 'circular';
-                currentKeyword = document.getElementById('keywords').value.trim();
                 
                 const params = {
                     apiKey: apiKey,
                     location: location,
-                    keywords: currentKeyword,
+                    keywords: document.getElementById('keywords').value.trim(),
                     types: $('#types').val() || [],
                     radius: document.getElementById('radius').value,
                     region: document.getElementById('region').value.trim(),
@@ -3697,10 +3339,8 @@
                     const poiElement = document.createElement('div');
                     poiElement.className = 'poi-item';
                     
-                    if (currentSearchType === 'polygon') {
+                    if (polygonPoints.length > 0) {
                         poiElement.classList.add('polygon-result-item');
-                    } else if (currentSearchType === 'district') {
-                        poiElement.classList.add('district-result-item');
                     }
                     
                     poiElement.dataset.index = index;
@@ -3791,45 +3431,12 @@
                 imageModal.style.display = 'flex';
             };
             
-            // 高德POI大类编码 -> 中文名称 映射（取 typecode 前两位 + "0000"）
-            const POI_CATEGORY_MAP = {
-                '010000': '汽车服务',
-                '020000': '汽车销售',
-                '030000': '汽车维修',
-                '040000': '摩托车服务',
-                '050000': '餐饮服务',
-                '060000': '购物服务',
-                '070000': '生活服务',
-                '080000': '体育休闲服务',
-                '090000': '医疗保健服务',
-                '100000': '住宿服务',
-                '110000': '风景名胜',
-                '120000': '商务住宅',
-                '130000': '政府机构及社会团体',
-                '140000': '科教文化服务',
-                '150000': '交通设施服务',
-                '160000': '金融保险服务',
-                '170000': '公司企业',
-                '180000': '道路附属设施',
-                '190000': '地名地址信息',
-                '200000': '公共设施',
-                '210000': '事件活动',
-                '220000': '室内设施',
-                '970000': '热点商圈',
-                '990000': '其他'
-            };
-
-            // 根据 category_code 返回 POI 大类中文名称
-            function getPoiCategory(categoryCode) {
-                return POI_CATEGORY_MAP[categoryCode] || '';
-            }
-
             // 生成CSV内容
             function generateCSVContent(pois) {
-                const headers = ['名称', 'POI_ID', '关键词', '经度', '纬度', '地址', '省份', '城市', '区县', '商圈', '类型', 'POI大类', '电话', '评分', '人均消费', '距离(米)', '图片链接1', '图片链接2', '图片链接3'];
-
+                const headers = ['名称', 'ID', '坐标', '类型', '分类编码', '地址', '省份', '城市', '区县', '电话', '评分', '人均消费', '距离(米)', '商圈', '图片链接1', '图片链接2', '图片链接3'];
+                
                 let csvContent = headers.join(',') + '\n';
-
+                
                 pois.forEach(poi => {
                     let bizExt = {};
                     try {
@@ -3841,51 +3448,27 @@
                     } catch (e) {
                         console.warn('解析biz_ext失败:', e);
                     }
-
+                    
                     const rating = bizExt.rating || poi.rating || '';
                     const cost = bizExt.cost || poi.cost || '';
                     const telephone = poi.tel || '';
                     const distance = poi.distance || '';
-
-                    // 拆分经纬度
-                    const locationStr = poi.location || '';
-                    let lon = '', lat = '';
-                    if (locationStr) {
-                        const parts = locationStr.split(',');
-                        if (parts.length >= 2) {
-                            lon = parts[0].trim();
-                            lat = parts[1].trim();
-                        }
-                    }
-
-                    // 计算 POI 大类
-                    const poiTypeCode = poi.typecode || '';
-                    let categoryCode;
-                    if (poiTypeCode.length >= 2) {
-                        categoryCode = poiTypeCode.substring(0, 2) + '0000';
-                    } else {
-                        categoryCode = '000000';
-                    }
-                    const poiCategory = getPoiCategory(categoryCode);
-
+                    
                     const photos = poi.photos || [];
                     const photoUrl1 = photos.length > 0 && photos[0].url ? photos[0].url : '';
                     const photoUrl2 = photos.length > 1 && photos[1].url ? photos[1].url : '';
                     const photoUrl3 = photos.length > 2 && photos[2].url ? photos[2].url : '';
-
+                    
                     const row = [
                         `"${String(poi.name || '').replace(/"/g, '""')}"`,
                         `"${poi.id || ''}"`,
-                        `"${currentKeyword}"`,
-                        `"${lon}"`,
-                        `"${lat}"`,
+                        `"${poi.location || ''}"`,
+                        `"${String(poi.type || '').replace(/"/g, '""')}"`,
+                        `"${poi.typecode || ''}"`,
                         `"${String(poi.address || '').replace(/"/g, '""')}"`,
                         `"${poi.pname || ''}"`,
                         `"${poi.cityname || ''}"`,
                         `"${poi.adname || ''}"`,
-                        `"${poi.business_area || ''}"`,
-                        `"${String(poi.type || '').replace(/"/g, '""')}"`,
-                        `"${poiCategory}"`,
                         `"${telephone}"`,
                         `"${rating}"`,
                         `"${cost}"`,
@@ -3894,10 +3477,10 @@
                         `"${photoUrl2}"`,
                         `"${photoUrl3}"`
                     ];
-
+                    
                     csvContent += row.join(',') + '\n';
                 });
-
+                
                 return csvContent;
             }
             
@@ -3919,8 +3502,7 @@
                 
                 const now = new Date();
                 const dateStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`;
-                const searchTypeMap = { circular: '圆形', polygon: '多边形', district: '行政区' };
-                const searchType = searchTypeMap[currentSearchType] || '搜索';
+                const searchType = polygonPoints.length > 0 ? '多边形' : '圆形';
                 link.setAttribute('download', `周边搜索_${searchType}_${dateStr}.csv`);
                 
                 link.style.visibility = 'hidden';
@@ -3998,53 +3580,8 @@
                 }
             });
             
-            // 密钥本地保存（仅保存在浏览器 localStorage，本机可见，不上传）
-            function setupKeyPersistence() {
-                const keyFields = [
-                    { id: 'mapApiKey',    storageKey: 'amap_map_api_key' },
-                    { id: 'securityKey',  storageKey: 'amap_security_key' },
-                    { id: 'searchApiKey', storageKey: 'amap_search_api_key' }
-                ];
-
-                if (!window.localStorage) {
-                    updateDebugInfo('当前环境不支持 localStorage，跳过密钥本地保存');
-                    return;
-                }
-
-                keyFields.forEach(f => {
-                    const el = document.getElementById(f.id);
-                    if (!el) return;
-
-                    try {
-                        const saved = localStorage.getItem(f.storageKey);
-                        if (saved !== null) el.value = saved;
-                    } catch (e) {
-                        console.warn('读取本地密钥失败:', e);
-                    }
-
-                    el.addEventListener('input', function() {
-                        try {
-                            if (el.value.trim()) {
-                                localStorage.setItem(f.storageKey, el.value.trim());
-                            } else {
-                                localStorage.removeItem(f.storageKey);
-                            }
-                        } catch (e) {
-                            console.warn('保存本地密钥失败:', e);
-                        }
-                    });
-                });
-
-                updateDebugInfo('已从浏览器本地读取已保存的密钥（如有）');
-            }
-
-            setupKeyPersistence();
-
             // 初始化多边形搜索界面
             initPolygonSearchUI();
-            
-            // 初始化行政区搜索界面
-            initDistrictSearchUI();
             
             // 初始化完成
             updateDebugInfo('页面初始化完成，可以开始搜索');

@@ -62,8 +62,6 @@
             flex: 2;
             min-width: 300px;
             padding: 15px;
-            display: flex;
-            flex-direction: column;
         }
         
         .form-group {
@@ -207,15 +205,13 @@
         
         /* 地图容器样式 */
         .map-section {
-            margin: 0 0 20px 0;
+            margin-top: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: hidden;
             height: 500px;
             display: none;
             position: relative;
-            order: -1; /* 置于右列顶部，即「右上」 */
-            flex-shrink: 0;
         }
         
         #mapContainer {
@@ -678,8 +674,8 @@
         
         /* 安全密钥区块 */
         .security-section {
-            background: #f4f7fb;
-            border: 1px solid #cfd8e3;
+            background: #fff8e1;
+            border: 1px solid #ffd54f;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
@@ -703,32 +699,6 @@
         
         .console-link:hover {
             background: #1565c0;
-        }
-        
-        /* 密钥分组配色：地图Key + 安全密钥 为一组(青绿)，搜索Key 单独一组(橙) */
-        input.key-display {
-            border: 2px solid #009688;
-            background-color: #f0f7f6;
-        }
-        input.key-display:focus {
-            outline: none;
-            border-color: #00796b;
-            box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.18);
-        }
-        input.key-search {
-            border: 2px solid #fb8c00;
-            background-color: #fff6ed;
-        }
-        input.key-search:focus {
-            outline: none;
-            border-color: #ef6c00;
-            box-shadow: 0 0 0 2px rgba(251, 140, 0, 0.18);
-        }
-        .label-key-display {
-            color: #00796b !important;
-        }
-        .label-key-search {
-            color: #e65100 !important;
         }
         
         /* 全屏样式 */
@@ -1118,9 +1088,9 @@
             <div class="form-section">
                 <!-- 地图显示密钥 -->
                 <div class="form-group">
-                    <label for="mapApiKey" class="label-key-display">高德地图API Key (用于显示地图) *</label>
+                    <label for="mapApiKey">高德地图API Key (用于显示地图) *</label>
                     <div class="api-key-group">
-                        <input type="text" id="mapApiKey" class="key-display" placeholder="请输入高德地图JavaScript API Key" value="">
+                        <input type="text" id="mapApiKey" placeholder="请输入高德地图JavaScript API Key" value="">
                         <button id="loadMapBtn">加载地图</button>
                         <button id="toggleMapBtn" class="map-toggle-btn" disabled>显示地图</button>
                     </div>
@@ -1129,21 +1099,20 @@
                 
                 <!-- 安全密钥区块 -->
                 <div class="security-section">
-                    <h3 style="margin-bottom: 12px; color: #37474f;">API 密钥设置</h3>
-                    <div class="help-text" style="margin-bottom: 12px;">颜色说明：<span style="color:#00796b;font-weight:bold;">青绿色</span> = 地图 Key + 安全密钥（配合使用，一组）；<span style="color:#e65100;font-weight:bold;">橙色</span> = 搜索 Key（单独一组）。</div>
+                    <h3 style="margin-bottom: 12px; color: #f57f17;">安全密钥</h3>
                     
                     <div class="form-group">
-                        <label for="securityKey" class="label-key-display">安全密钥 (Security Key)</label>
+                        <label for="securityKey">安全密钥 (Security Key)</label>
                         <div class="security-key-group">
-                            <input type="text" id="securityKey" class="key-display" placeholder="请输入安全密钥 (可选)" value="">
+                            <input type="text" id="securityKey" placeholder="请输入安全密钥 (可选)" value="">
                         </div>
                         <div class="help-text">如果您的API Key配置了安全密钥，请在此输入</div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="searchApiKey" class="label-key-search">高德Web服务API Key (用于搜索) *</label>
+                        <label for="searchApiKey">高德Web服务API Key (用于搜索) *</label>
                         <div class="api-key-group">
-                            <input type="text" id="searchApiKey" class="key-search" placeholder="请输入高德Web服务API Key">
+                            <input type="text" id="searchApiKey" placeholder="请输入高德Web服务API Key">
                             <a id="amapConsoleLink" href="https://console.amap.com/dev/key/app" target="_blank" rel="noopener" class="console-link">高德控制台获取</a>
                         </div>
                         <div class="help-text">请确保您有高德地图Web服务API权限（圆形/多边形/行政区搜索共用此 Key）</div>
@@ -3998,48 +3967,6 @@
                 }
             });
             
-            // 密钥本地保存（仅保存在浏览器 localStorage，本机可见，不上传）
-            function setupKeyPersistence() {
-                const keyFields = [
-                    { id: 'mapApiKey',    storageKey: 'amap_map_api_key' },
-                    { id: 'securityKey',  storageKey: 'amap_security_key' },
-                    { id: 'searchApiKey', storageKey: 'amap_search_api_key' }
-                ];
-
-                if (!window.localStorage) {
-                    updateDebugInfo('当前环境不支持 localStorage，跳过密钥本地保存');
-                    return;
-                }
-
-                keyFields.forEach(f => {
-                    const el = document.getElementById(f.id);
-                    if (!el) return;
-
-                    try {
-                        const saved = localStorage.getItem(f.storageKey);
-                        if (saved !== null) el.value = saved;
-                    } catch (e) {
-                        console.warn('读取本地密钥失败:', e);
-                    }
-
-                    el.addEventListener('input', function() {
-                        try {
-                            if (el.value.trim()) {
-                                localStorage.setItem(f.storageKey, el.value.trim());
-                            } else {
-                                localStorage.removeItem(f.storageKey);
-                            }
-                        } catch (e) {
-                            console.warn('保存本地密钥失败:', e);
-                        }
-                    });
-                });
-
-                updateDebugInfo('已从浏览器本地读取已保存的密钥（如有）');
-            }
-
-            setupKeyPersistence();
-
             // 初始化多边形搜索界面
             initPolygonSearchUI();
             
