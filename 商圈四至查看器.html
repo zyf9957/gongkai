@@ -80,7 +80,7 @@
 
   <div class="wrap">
     <!-- 密钥设置 -->
-    <div class="card">
+    <div class="card" id="keyCard">
       <h3>① 高德地图密钥设置</h3>
       <div class="key-row">
         <div class="fld">
@@ -493,9 +493,14 @@ const _pname = _params.get('name');
 const _pgeo  = _params.get('geo');
 const _ptitle= _params.get('title');
 const _pkey  = _params.get('key');
+const _psec  = _params.get('sec') || _params.get('security');
 if(_pkey){
   $('mapApiKey').value = _pkey;
   try{ localStorage.setItem('amap_js_key', _pkey); }catch(e){}
+}
+if(_psec){
+  $('securityKey').value = _psec;
+  try{ localStorage.setItem('amap_sec_key', _psec); }catch(e){}
 }
 if(_pgeo){
   try{ _autoRec = recordFromGeoJSON(_pgeo); }catch(e){ _autoRec=null; }
@@ -509,6 +514,7 @@ function _openAuto(){
   if(_autoRec){ const t=_autoRec; _autoRec=null; renderDistrict(t); }
 }
 if($('mapApiKey').value.trim()){
+  $('keyCard').style.display = 'none';
   loadMap();
   const _iv = setInterval(()=>{ if(isMapLoaded){ clearInterval(_iv); _openAuto(); } }, 400);
   setTimeout(()=>clearInterval(_iv), 10000);
