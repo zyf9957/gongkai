@@ -449,6 +449,30 @@ $('searchBox').addEventListener('input', e=>{
   buildTable(f);
 });
 
+/* ---------- 由 GeoJSON 构造商圈记录（飞书 ?geo= 直传几何） ---------- */
+function recordFromGeoJSON(raw){
+  let geom; try{ geom = JSON.parse(raw); }catch(e){ try{ geom = JSON.parse(raw.replace(/\t/g,'').trim()); }catch(e2){ return null; } }
+  const t = geom.type, co = geom.coordinates||[];
+  let rings=[];
+  if(t==='Polygon'){ if(co[0]) rings.push(co[0]); }
+  else if(t==='MultiPolygon'){ co.forEach(p=>{ if(p[0]) rings.push(p[0]); }); }
+  else if(co[0]) { rings.push(co[0]); }
+  if(!rings.length) return null;
+  const pts = rings.flat();
+  const lons = pts.map(p=>p[0]), lats = pts.map(p=>p[1]);
+  const ex = { east:[Math.max(...lons), pts.find(p=>p[0]===Math.max(...lons))[1]],
+               west:[Math.min(...lons), pts.find(p=>p[0]===Math.min(...lons))[1]],
+               south:[pts.find(p=>p[1]===Math.min(...lats))[0], Math.min(...lats)],
+               north:[pts.find(p=>p[1]===Math.max(...lats))[0], Math.max(...lats)] };
+  const area = rings.reduce((a,r)=>a+ringAreaKm2(r),0);
+  return { name:'来自飞书·自定义商圈', batch:'-', status:'-', geomType:t,
+    rings: rings.map(rg=>rg.map(p=>[round6(p[0]),round6(p[1])])),
+    vertices: pts.length, areaKm2: Math.round(area*1e4)/1e4,
+    bounds:{west:round6(Math.min(...lons)),south:round6(Math.min(...lats)),east:round6(Math.max(...lons)),north:round6(Math.max(...lats))},
+    extremes:{ east:[round6(ex.east[0]),round6(ex.east[1])], west:[round6(ex.west[0]),round6(ex.west[1])],
+               south:[round6(ex.south[0]),round6(ex.south[1])], north:[round6(ex.north[0]),round6(ex.north[1])] } };
+}
+
 /* ---------- 初始化 ---------- */
 buildTable(currentData);
 
@@ -462,19 +486,25 @@ try{
   if(_w) $('wsApiKey').value = _w;
 }catch(e){}
 
-// 读取 URL 参数：?name=商圈名&key=可选Key，实现飞书公式一键跳转定位
+// 读取 URL 参数：?name=商圈名(内置数据查找) 或 ?geo=GeoJSON(飞书直传) &key=可选 &title=可选显示名
 let _autoRec = null;
 const _params = new URLSearchParams(location.search);
 const _pname = _params.get('name');
+const _pgeo  = _params.get('geo');
+const _ptitle= _params.get('title');
 const _pkey  = _params.get('key');
 if(_pkey){
   $('mapApiKey').value = _pkey;
   try{ localStorage.setItem('amap_js_key', _pkey); }catch(e){}
 }
-if(_pname){
+if(_pgeo){
+  try{ _autoRec = recordFromGeoJSON(_pgeo); }catch(e){ _autoRec=null; }
+  if(!_autoRec) showErr('无法解析链接中的 geo 空间信息，请检查字段内容。');
+} else if(_pname){
   _autoRec = currentData.find(r=>r.name && r.name===_pname)
           || currentData.find(r=>r.name && _pname && r.name.includes(_pname)) || null;
 }
+if(_autoRec && _ptitle) _autoRec.name = _ptitle;
 function _openAuto(){
   if(_autoRec){ const t=_autoRec; _autoRec=null; renderDistrict(t); }
 }
