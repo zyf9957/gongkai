@@ -203,6 +203,7 @@ function loadMap(){
   const key = $('mapApiKey').value.trim();
   const sec = $('securityKey').value.trim();
   if(!key){ showErr('请先填写高德 JS API Key'); return; }
+  try{ localStorage.setItem('amap_js_key', key); if(sec) localStorage.setItem('amap_sec_key', sec); }catch(e){}
   $('loadMapBtn').disabled = true; $('loadMapBtn').textContent = '加载中…';
   window._AMapSecurityConfig = { securityJsCode: sec };
   const url = `https://webapi.amap.com/maps?v=2.0&key=${key}&plugin=AMap.Scale,AMap.ToolBar`;
@@ -246,14 +247,10 @@ function buildTable(records){
 /* ---------- 渲染单个商圈（弹窗） ---------- */
 function ensureModalMap(){
   if(modalMap) return;
+  $('modalMapContainer').innerHTML = '';
   modalMap = new AMap.Map('modalMapContainer', { zoom: 14, viewMode:'2D' });
 }
 function renderDistrict(r){
-  if(!isMapLoaded){
-    if($('mapApiKey').value.trim()){ loadMap(); setTimeout(()=>renderDistrict(r), 1500); showHint('正在加载地图，请稍候…'); }
-    else showErr('请先在上方填写高德 JS API Key 并点击「加载地图」。');
-    return;
-  }
   $('modalTitle').textContent = (r.name||'商圈') + ' · 四至范围';
   $('modalMask').classList.add('show');
   // 基本信息
@@ -275,6 +272,15 @@ function renderDistrict(r){
       </div>`);
   });
   $('fourNote').textContent = '坐标为该商圈边界在四个方向上的最值点。';
+  // 地图（需高德 Key）
+  if(!isMapLoaded){
+    if($('mapApiKey').value.trim()){
+      loadMap(); setTimeout(()=>renderDistrict(r), 1500); showHint('正在加载地图，请稍候…');
+    } else {
+      $('modalMapContainer').innerHTML = '<div style="padding:24px;color:#888;line-height:1.7;">尚未填写高德 JS API Key，暂无法渲染地图图形。<br>请在页面上方填写 Key 并「加载地图」后，重新打开本链接即可看到四至多边形。<br><br>四至极值坐标已在上方面板展示。</div>';
+    }
+    return;
+  }
   // 地图
   ensureModalMap();
   modalMap.clearMap();
@@ -433,6 +439,7 @@ $('fileInput').addEventListener('change', e=>{
   rd.readAsText(f, 'utf-8');
 });
 $('exportBtn').addEventListener('click', exportViewer);
+$('wsApiKey').addEventListener('change', ()=>{ try{ localStorage.setItem('amap_ws_key', $('wsApiKey').value.trim()); }catch(e){} });
 $('modalClose').addEventListener('click', ()=> $('modalMask').classList.remove('show'));
 $('modalMask').addEventListener('click', e=>{ if(e.target===$('modalMask')) $('modalMask').classList.remove('show'); });
 $('searchBox').addEventListener('input', e=>{
@@ -444,6 +451,40 @@ $('searchBox').addEventListener('input', e=>{
 
 /* ---------- 初始化 ---------- */
 buildTable(currentData);
+
+// 预填已保存的 Key（localStorage），实现从飞书深链免重复粘贴
+try{
+  const _k = localStorage.getItem('amap_js_key');
+  const _s = localStorage.getItem('amap_sec_key');
+  const _w = localStorage.getItem('amap_ws_key');
+  if(_k) $('mapApiKey').value = _k;
+  if(_s) $('securityKey').value = _s;
+  if(_w) $('wsApiKey').value = _w;
+}catch(e){}
+
+// 读取 URL 参数：?name=商圈名&key=可选Key，实现飞书公式一键跳转定位
+let _autoRec = null;
+const _params = new URLSearchParams(location.search);
+const _pname = _params.get('name');
+const _pkey  = _params.get('key');
+if(_pkey){
+  $('mapApiKey').value = _pkey;
+  try{ localStorage.setItem('amap_js_key', _pkey); }catch(e){}
+}
+if(_pname){
+  _autoRec = currentData.find(r=>r.name && r.name===_pname)
+          || currentData.find(r=>r.name && _pname && r.name.includes(_pname)) || null;
+}
+function _openAuto(){
+  if(_autoRec){ const t=_autoRec; _autoRec=null; renderDistrict(t); }
+}
+if($('mapApiKey').value.trim()){
+  loadMap();
+  const _iv = setInterval(()=>{ if(isMapLoaded){ clearInterval(_iv); _openAuto(); } }, 400);
+  setTimeout(()=>clearInterval(_iv), 10000);
+} else if(_autoRec){
+  renderDistrict(_autoRec); _autoRec=null;
+}
 </script>
 </body>
 </html>
