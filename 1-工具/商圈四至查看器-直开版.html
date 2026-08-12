@@ -381,12 +381,16 @@ if(_pgeo){
 if(_autoRec){
   if(_ptitle) _autoRec.name = _ptitle;
   $('hintOverlay').style.display = 'none';
+  // 深链模式：隐藏导入CSV与密钥切换按钮，保持页面纯净（仅查看四至）
+  $('uploadBtn').style.display = 'none';
+  $('keyToggle').style.display = 'none';
   if($('mapApiKey').value.trim()){
-    $('keyCard').classList.add('hidden');
+    $('keyCard').classList.add('hidden');   // 有 Key 则直接隐藏密钥面板，用户无法查看/编辑
     loadMap();
     const _iv = setInterval(()=>{ if(isMapLoaded){ clearInterval(_iv); renderDistrict(_autoRec); _autoRec=null; } }, 400);
     setTimeout(()=>clearInterval(_iv), 10000);
   } else {
+    // 无 Key（且浏览器未记忆）：仍显示密钥面板供手动输入，但导入按钮已隐藏
     renderDistrict(_autoRec);
     _autoRec = null;
   }
