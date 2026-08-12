@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商圈四至查看器（直开版）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Microsoft YaHei', Arial, sans-serif; }
+  html, body { height: 100%; }
+  body { background: #eef1f5; color: #333; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .topbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: linear-gradient(135deg, #1e88e5, #0d47a1); color: #fff; flex-wrap: wrap; }
+  .topbar .title { font-size: 16px; font-weight: bold; white-space: nowrap; }
+  .topbar select { padding: 6px 8px; border-radius: 5px; border: none; font-size: 13px; max-width: 260px; }
+  .topbar button { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 5px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
+  .topbar button:hover { background: rgba(255,255,255,.32); }
+  .topbar .spacer { flex: 1; }
+  .main { flex: 1; display: flex; min-height: 0; position: relative; }
+  #mapContainer { flex: 2; min-width: 0; position: relative; background: #dfe6ee; }
+  .side { flex: 1; max-width: 360px; min-width: 300px; padding: 16px; overflow: auto; background: #fafbfc; border-left: 1px solid #e3e8ee; }
+  .side h3 { font-size: 15px; color: #37474f; margin-bottom: 10px; border-bottom: 1px solid #e0e6ed; padding-bottom: 8px; }
+  .four-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .four-cell { background: #fff; border: 1px solid #e3e8ee; border-radius: 6px; padding: 8px; }
+  .four-cell .lab { font-size: 12px; color: #888; }
+  .four-cell .val { font-family: monospace; font-size: 13px; color: #222; }
+  .four-cell .road { font-size: 12px; color: #1565c0; margin-top: 2px; }
+  .meta-row { font-size: 13px; margin-bottom: 6px; }
+  .meta-row b { color: #555; }
+  .keycard { background: #fff; border-bottom: 1px solid #e3e8ee; padding: 12px 14px; }
+  .keycard.hidden { display: none; }
+  .key-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .key-row .fld { flex: 1; min-width: 200px; }
+  .keycard label { display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px; }
+  .keycard input { width: 100%; padding: 8px; border: 1px solid #d7dde3; border-radius: 5px; font-size: 13px; }
+  .keycard input.key-display { border: 2px solid #009688; background: #f0f7f6; }
+  .keycard input.key-ws { border: 2px solid #fb8c00; background: #fff6ed; }
+  .help { font-size: 12px; color: #888; margin-top: 6px; }
+  .maphint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; color: #888; line-height: 1.7; text-align: center; }
+  .hint-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(245,247,250,.97); z-index: 5; }
+  .hint-box { text-align: center; max-width: 380px; padding: 30px; }
+  .hint-box h2 { font-size: 18px; color: #37474f; margin-bottom: 10px; }
+  .hint-box p { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.7; }
+  .hint-box button { background: #1e88e5; color: #fff; border: none; border-radius: 6px; padding: 11px 22px; font-size: 14px; cursor: pointer; }
+  .hint-box button:hover { background: #1565c0; }
+  .status { font-size: 12px; color: #888; padding: 4px 14px; min-height: 16px; }
+  .status.err { color: #d32f2f; }
+  .status.ok { color: #2e7d32; }
+  @media (max-width: 760px) {
+    .main { flex-direction: column; }
+    #mapContainer { flex: none; height: 48vh; }
+    .side { max-width: none; border-left: none; border-top: 1px solid #e3e8ee; }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="title">商圈四至查看器</span>
+    <select id="districtSelect" style="display:none;"></select>
+    <button id="renderAllBtn" style="display:none;">全部</button>
+    <button id="uploadBtn">导入 CSV</button>
+    <button id="keyToggle">密钥</button>
+    <span class="spacer"></span>
+    <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none;">
+  </div>
+
+  <div class="keycard" id="keyCard">
+    <div class="key-row">
+      <div class="fld">
+        <label>高德 JS API Key（渲染地图，必填）</label>
+        <input type="text" id="mapApiKey" class="key-display" placeholder="JavaScript API Key">
+      </div>
+      <div class="fld">
+        <label>安全密钥 Security Key（如已配置）</label>
+        <input type="text" id="securityKey" placeholder="安全密钥（可选）">
+      </div>
+      <div class="fld">
+        <label>Web 服务 Key（反查四至道路名，可选）</label>
+        <input type="text" id="wsApiKey" class="key-ws" placeholder="Web 服务 Key（可选）">
+      </div>
+      <div class="fld" style="flex:0 0 auto;">
+        <button id="loadMapBtn">加载地图</button>
+      </div>
+    </div>
+    <div class="help">JS API Key 需开通「地图 JS API 2.0」；安全密钥与控制台「安全密钥」一致。Web 服务 Key 用于把四至坐标反查成实际道路/地名（不填也能看坐标）。</div>
+  </div>
+  <div class="status" id="statusBar"></div>
+
+  <div class="main">
+    <div id="mapContainer"></div>
+    <div class="side">
+      <h3 id="districtTitle">商圈四至范围</h3>
+      <div id="metaPanel"></div>
+      <div class="four-grid" id="fourGrid"></div>
+      <div id="fourNote" class="help"></div>
+    </div>
+
+    <div class="hint-overlay" id="hintOverlay">
+      <div class="hint-box">
+        <h2>请导入商圈 CSV</h2>
+        <p>本页为「直开四至地图」版：导入包含「空间信息」列（GeoJSON Polygon / MultiPolygon）的表格后，将立即显示第一个商圈的四至范围，并可在左上角下拉切换。<br>也可通过带 <code>?geo=</code> 参数的链接直接打开某个商圈（如飞书深链）。</p>
+        <button id="hintImportBtn">选择 CSV 文件</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const dirLabel = { east:'东至', west:'西至', south:'南至', north:'北至' };
+const dirColor = { east:'#d32f2f', south:'#388e3c', west:'#fbc02d', north:'#7b1fa2' };
+
+let map = null;
+let isMapLoaded = false;
+let currentData = [];
+let current = null;
+
+/* ---------- 工具 ---------- */
+function ringAreaKm2(ring){
+  if(!ring || ring.length < 3) return 0;
+  const R = 6371000, lats = ring.map(p=>p[1]);
+  const lat0 = lats.reduce((a,b)=>a+b,0)/lats.length;
+  const kx = Math.PI/180*R*Math.cos(lat0*Math.PI/180), ky = Math.PI/180*R;
+  let area = 0, n = ring.length;
+  for(let i=0;i<n;i++){
+    const x1=ring[i][0]*kx, y1=ring[i][1]*ky;
+    const x2=ring[(i+1)%n][0]*kx, y2=ring[(i+1)%n][1]*ky;
+    area += x1*y2 - x2*y1;
+  }
+  return Math.abs(area)/2/1e6;
+}
+function fmt(v){ return Number(v).toFixed(6); }
+function round6(v){ return Math.round(v*1e6)/1e6; }
+
+/* ---------- 加载高德地图 ---------- */
+function loadMap(){
+  const key = $('mapApiKey').value.trim();
+  const sec = $('securityKey').value.trim();
+  if(!key){ setStatus('请先填写高德 JS API Key', 'err'); return; }
+  try{ localStorage.setItem('amap_js_key', key); if(sec) localStorage.setItem('amap_sec_key', sec); }catch(e){}
+  $('loadMapBtn').disabled = true; $('loadMapBtn').textContent = '加载中…';
+  window._AMapSecurityConfig = { securityJsCode: sec };
+  const url = `https://webapi.amap.com/maps?v=2.0&key=${key}&plugin=AMap.Scale,AMap.ToolBar`;
+  const s = document.createElement('script');
+  s.src = url;
+  s.onload = ()=>{
+    isMapLoaded = true;
+    initMap();
+    $('loadMapBtn').textContent = '已加载';
+    setStatus('地图已加载，可直接查看四至多边形。', 'ok');
+    if(current) renderDistrict(current);
+  };
+  s.onerror = ()=>{ setStatus('高德地图加载失败，请检查 Key 与安全密钥。', 'err'); $('loadMapBtn').disabled=false; $('loadMapBtn').textContent='加载地图'; };
+  document.head.appendChild(s);
+}
+function initMap(){
+  if(map) return;
+  $('mapContainer').innerHTML = '';
+  map = new AMap.Map('mapContainer', { zoom: 13, viewMode:'2D' });
+}
+
+/* ---------- 渲染单个商圈（主地图 + 侧栏） ---------- */
+function renderDistrict(r){
+  current = r;
+  $('districtTitle').textContent = (r.name||'商圈') + ' · 四至范围';
+  $('metaPanel').innerHTML = `
+    <div class="meta-row"><b>批次：</b>${r.batch||'-'}</div>
+    <div class="meta-row"><b>状态：</b>${r.status||'-'}</div>
+    <div class="meta-row"><b>几何类型：</b>${r.geomType||'-'}</div>
+    <div class="meta-row"><b>顶点数：</b>${r.vertices??'-'}</div>
+    <div class="meta-row"><b>面积：</b>${r.areaKm2!=null?r.areaKm2+' km²':'-'}</div>`;
+  const fg = $('fourGrid'); fg.innerHTML='';
+  ['east','south','west','north'].forEach(d=>{
+    const p = (r.extremes&&r.extremes[d]) || [0,0];
+    fg.insertAdjacentHTML('beforeend', `
+      <div class="four-cell" style="border-left:4px solid ${dirColor[d]}">
+        <div class="lab">${dirLabel[d]}（极值坐标）</div>
+        <div class="val">${fmt(p[0])}, ${fmt(p[1])}</div>
+        <div class="road" id="road_${d}">—</div>
+      </div>`);
+  });
+  $('fourNote').textContent = '坐标为该商圈边界在四个方向上的最值点（西≤东、南≤北）。';
+
+  if(!isMapLoaded){
+    if($('mapApiKey').value.trim()){
+      loadMap();
+    } else {
+      $('mapContainer').innerHTML = '<div class="maphint">尚未填写高德 JS API Key，暂无法渲染地图图形。<br>请在上方「密钥」中填写 Key 并「加载地图」，即可看到四至多边形。<br><br>四至极值坐标已显示在右侧面板。</div>';
+    }
+    return;
+  }
+  map.clearMap();
+  (r.rings||[]).forEach(ring=>{
+    map.add(new AMap.Polygon({ path: ring, strokeColor:'#1e88e5', strokeWeight:2, strokeOpacity:.9, fillColor:'#1e88e5', fillOpacity:.22 }));
+  });
+  ['east','south','west','north'].forEach(d=>{
+    const p = (r.extremes&&r.extremes[d]); if(!p) return;
+    map.add(new AMap.Marker({ position: p,
+      content: `<div style="background:${dirColor[d]};color:#fff;border:2px solid #fff;border-radius:50%;width:26px;height:26px;line-height:22px;text-align:center;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);font-size:13px;">${dirLabel[d][0]}</div>`,
+      offset: new AMap.Pixel(-13,-13) }));
+  });
+  setTimeout(()=>{ try{ map.setFitView(); }catch(e){} }, 200);
+  reverseGeocodeFour(r);
+}
+
+function reverseGeocodeFour(r){
+  const ws = $('wsApiKey').value.trim();
+  if(!ws) return;
+  ['east','south','west','north'].forEach((d, k)=>{
+    const p = (r.extremes&&r.extremes[d]); if(!p) return;
+    const cell = $('road_'+d); if(!cell) return;
+    cell.textContent = '解析中…';
+    setTimeout(()=>{
+      fetch(`https://restapi.amap.com/v3/geocode/regeo?key=${encodeURIComponent(ws)}&location=${p[0]},${p[1]}&radius=100&extensions=base`)
+        .then(res=>res.json()).then(j=>{
+          cell.textContent = (j&&j.regeocode&&j.regeocode.formatted_address) ? j.regeocode.formatted_address : '(无道路名)';
+        }).catch(()=>{ cell.textContent = '(解析失败)'; });
+    }, k*250);
+  });
+}
+
+/* ---------- 一键渲染全部 ---------- */
+function renderAll(){
+  if(!isMapLoaded){ setStatus('请先加载地图。', 'err'); return; }
+  initMap();
+  map.clearMap();
+  currentData.forEach(r=>{
+    (r.rings||[]).forEach(ring=>{
+      map.add(new AMap.Polygon({ path: ring, strokeColor:'#1e88e5', strokeWeight:1.2, strokeOpacity:.8, fillColor:'#1e88e5', fillOpacity:.12 }));
+    });
+  });
+  const ext = { east:[], south:[], west:[], north:[] };
+  currentData.forEach(r=>{ ['east','south','west','north'].forEach(d=>{ const p=r.extremes&&r.extremes[d]; if(p) ext[d].push(p); }); });
+  ['east','south','west','north'].forEach(d=>{
+    ext[d].forEach(p=>{
+      map.add(new AMap.Marker({ position:p,
+        content:`<div style="background:${dirColor[d]};color:#fff;border:2px solid #fff;border-radius:50%;width:18px;height:18px;line-height:14px;text-align:center;font-size:11px;font-weight:bold;box-shadow:0 1px 3px rgba(0,0,0,.4);">${dirLabel[d][0]}</div>`,
+        offset:new AMap.Pixel(-9,-9) }));
+    });
+  });
+  $('districtTitle').textContent = `全部商圈（${currentData.length}）· 四至极值`;
+  $('metaPanel').innerHTML = `<div class="meta-row">已渲染全部 <b>${currentData.length}</b> 个商圈，红/绿/黄/紫点为各商圈东/南/西/北四至极值。</div>`;
+  $('fourGrid').innerHTML = '';
+  $('fourNote').textContent = '点击单个商圈请在上拉下拉框中选择。';
+  setTimeout(()=>{ try{ map.setFitView(); }catch(e){} }, 200);
+}
+
+/* ---------- CSV 解析与载入 ---------- */
+function parseCSV(text){
+  const rows=[]; let i=0, field='', row=[], inq=false;
+  text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  while(i<text.length){
+    const c=text[i];
+    if(inq){
+      if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i+=2; continue; } inq=false; i++; continue; }
+      field+=c; i++; continue;
+    } else {
+      if(c==='"'){ inq=true; i++; continue; }
+      if(c===','){ row.push(field); field=''; i++; continue; }
+      if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }
+      field+=c; i++;
+    }
+  }
+  if(field.length||row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+function loadCSVText(text){
+  const rows = parseCSV(text);
+  if(!rows.length){ setStatus('CSV 为空。', 'err'); return; }
+  const header = rows[0].map(h=>h.replace(/\t/g,'').trim());
+  const idx = {};
+  header.forEach((h,k)=> idx[h]=k);
+  const nameK = idx['商圈名称']!=null?'商圈名称':(idx['name']!=null?'name':header.find(h=>/名称|商圈/.test(h)));
+  const spaceK = idx['空间信息']!=null?'空间信息':header.find(h=>/空间|geometry|geojson|坐标|边界/i.test(h));
+  if(spaceK==null){ setStatus('未找到包含空间信息的列（如「空间信息」）。', 'err'); return; }
+  const recs=[]; let skip=0;
+  for(let r=1;r<rows.length;r++){
+    const cells=rows[r]; if(cells.length<=1 && !cells[0]) continue;
+    const raw = cells[spaceK]; if(!raw) { skip++; continue; }
+    let geom; try{ geom=JSON.parse(raw.trim()); }catch(e){ try{ geom=JSON.parse(raw.replace(/\t/g,'').trim()); }catch(e2){ skip++; continue; } }
+    const t=geom.type, co=geom.coordinates||[];
+    let rings=[];
+    if(t==='Polygon'){ if(co[0]) rings.push(co[0]); }
+    else if(t==='MultiPolygon'){ co.forEach(p=>{ if(p[0]) rings.push(p[0]); }); }
+    else { if(co[0]) rings.push(co[0]); }
+    if(!rings.length){ skip++; continue; }
+    const pts=rings.flat(); const lons=pts.map(p=>p[0]), lats=pts.map(p=>p[1]);
+    const ex={ east:[Math.max(...lons),pts.find(p=>p[0]===Math.max(...lons))[1]],
+               west:[Math.min(...lons),pts.find(p=>p[0]===Math.min(...lons))[1]],
+               south:[pts.find(p=>p[1]===Math.min(...lats))[0],Math.min(...lats)],
+               north:[pts.find(p=>p[1]===Math.max(...lats))[0],Math.max(...lats)] };
+    const area=rings.reduce((a,rg)=>a+ringAreaKm2(rg),0);
+    recs.push({ name: nameK!=null?(cells[idx[nameK]]||'').replace(/\t/g,'').trim():('商圈'+r),
+      batch:(idx['推送批次']!=null?cells[idx['推送批次']]:'').replace(/\t/g,'').trim(),
+      status:(idx['商圈状态']!=null?cells[idx['商圈状态']]:'').replace(/\t/g,'').trim(),
+      geomType:t, rings: rings.map(rg=>rg.map(p=>[round6(p[0]),round6(p[1])])),
+      vertices: pts.length, areaKm2: Math.round(area*1e4)/1e4,
+      bounds:{west:round6(Math.min(...lons)),south:round6(Math.min(...lats)),east:round6(Math.max(...lons)),north:round6(Math.max(...lats))},
+      extremes:{ east:[round6(ex.east[0]),round6(ex.east[1])], west:[round6(ex.west[0]),round6(ex.west[1])],
+                 south:[round6(ex.south[0]),round6(ex.south[1])], north:[round6(ex.north[0]),round6(ex.north[1])] } });
+  }
+  if(!recs.length){ setStatus('未能解析出任何商圈空间数据。', 'err'); return; }
+  currentData = recs;
+  populateSelect();
+  $('hintOverlay').style.display = 'none';
+  setStatus(`已载入 ${recs.length} 个商圈${skip?`，跳过 ${skip} 条`:''}。`, 'ok');
+  renderDistrict(recs[0]);
+}
+function populateSelect(){
+  const sel=$('districtSelect'); sel.innerHTML='';
+  currentData.forEach((r,i)=>{
+    const o=document.createElement('option'); o.value=i; o.textContent=r.name||('商圈'+i); sel.appendChild(o);
+  });
+  sel.style.display = currentData.length ? 'inline-block' : 'none';
+  $('renderAllBtn').style.display = currentData.length ? 'inline-block' : 'none';
+}
+
+/* ---------- 由 GeoJSON 构造商圈记录（飞书 ?geo= 直传几何） ---------- */
+function recordFromGeoJSON(raw){
+  let geom; try{ geom = JSON.parse(raw); }catch(e){ try{ geom = JSON.parse(raw.replace(/\t/g,'').trim()); }catch(e2){ return null; } }
+  const t = geom.type, co = geom.coordinates||[];
+  let rings=[];
+  if(t==='Polygon'){ if(co[0]) rings.push(co[0]); }
+  else if(t==='MultiPolygon'){ co.forEach(p=>{ if(p[0]) rings.push(p[0]); }); }
+  else if(co[0]) { rings.push(co[0]); }
+  if(!rings.length) return null;
+  const pts = rings.flat();
+  const lons = pts.map(p=>p[0]), lats = pts.map(p=>p[1]);
+  const ex = { east:[Math.max(...lons), pts.find(p=>p[0]===Math.max(...lons))[1]],
+               west:[Math.min(...lons), pts.find(p=>p[0]===Math.min(...lons))[1]],
+               south:[pts.find(p=>p[1]===Math.min(...lats))[0], Math.min(...lats)],
+               north:[pts.find(p=>p[1]===Math.max(...lats))[0], Math.max(...lats)] };
+  const area = rings.reduce((a,rg)=>a+ringAreaKm2(rg),0);
+  return { name:'来自飞书·自定义商圈', batch:'-', status:'-', geomType:t,
+    rings: rings.map(rg=>rg.map(p=>[round6(p[0]),round6(p[1])])),
+    vertices: pts.length, areaKm2: Math.round(area*1e4)/1e4,
+    bounds:{west:round6(Math.min(...lons)),south:round6(Math.min(...lats)),east:round6(Math.max(...lons)),north:round6(Math.max(...lats))},
+    extremes:{ east:[round6(ex.east[0]),round6(ex.east[1])], west:[round6(ex.west[0]),round6(ex.west[1])],
+               south:[round6(ex.south[0]),round6(ex.south[1])], north:[round6(ex.north[0]),round6(ex.north[1])] } };
+}
+
+/* ---------- 辅助 ---------- */
+function setStatus(m, cls){ const e=$('statusBar'); e.textContent=m; e.className='status'+(cls?' '+cls:''); }
+
+/* ---------- 事件 ---------- */
+$('loadMapBtn').addEventListener('click', loadMap);
+$('renderAllBtn').addEventListener('click', renderAll);
+$('uploadBtn').addEventListener('click', ()=> $('fileInput').click());
+$('hintImportBtn').addEventListener('click', ()=> $('fileInput').click());
+$('fileInput').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=> loadCSVText(rd.result);
+  rd.readAsText(f, 'utf-8');
+});
+$('keyToggle').addEventListener('click', ()=> $('keyCard').classList.toggle('hidden'));
+$('districtSelect').addEventListener('change', e=>{ const i=+e.target.value; if(currentData[i]) renderDistrict(currentData[i]); });
+$('wsApiKey').addEventListener('change', ()=>{ try{ localStorage.setItem('amap_ws_key', $('wsApiKey').value.trim()); }catch(e){} });
+
+/* ---------- 初始化（深链 / 引导导入） ---------- */
+try{
+  const _k = localStorage.getItem('amap_js_key');
+  const _s = localStorage.getItem('amap_sec_key');
+  const _w = localStorage.getItem('amap_ws_key');
+  if(_k) $('mapApiKey').value = _k;
+  if(_s) $('securityKey').value = _s;
+  if(_w) $('wsApiKey').value = _w;
+}catch(e){}
+
+const _params = new URLSearchParams(location.search);
+const _pgeo  = _params.get('geo');
+const _ptitle= _params.get('title');
+const _pkey  = _params.get('key');
+const _psec  = _params.get('sec') || _params.get('security');
+if(_pkey){ $('mapApiKey').value = _pkey; try{ localStorage.setItem('amap_js_key', _pkey); }catch(e){} }
+if(_psec){ $('securityKey').value = _psec; try{ localStorage.setItem('amap_sec_key', _psec); }catch(e){} }
+
+let _autoRec = null;
+if(_pgeo){
+  try{ _autoRec = recordFromGeoJSON(decodeURIComponent(_pgeo)); }catch(e){ _autoRec=null; }
+  if(!_autoRec) setStatus('无法解析链接中的 geo 空间信息，请检查字段内容。', 'err');
+}
+
+if(_autoRec){
+  if(_ptitle) _autoRec.name = _ptitle;
+  $('hintOverlay').style.display = 'none';
+  if($('mapApiKey').value.trim()){
+    $('keyCard').classList.add('hidden');
+    loadMap();
+    const _iv = setInterval(()=>{ if(isMapLoaded){ clearInterval(_iv); renderDistrict(_autoRec); _autoRec=null; } }, 400);
+    setTimeout(()=>clearInterval(_iv), 10000);
+  } else {
+    renderDistrict(_autoRec);
+    _autoRec = null;
+  }
+} else {
+  $('hintOverlay').style.display = 'flex';
+}
+</script>
+</body>
+</html>

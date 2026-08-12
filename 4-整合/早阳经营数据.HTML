@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>早阳数据</title>
+<!-- saved from url=(0060)https://zaoyang-zy-d7grfr3q43d18b353.webapps.tcloudbase.com/ -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>早阳经营数据</title>
     <style>
         * {
             margin: 0;
@@ -242,16 +242,14 @@
         }
     </style>
 </head>
-<body>
+<body data-version="4.0.5" data-settings-changed-at="0" data-cid="1786434448114">
 
     <!-- ===== 侧边栏 ===== -->
     <div class="sidebar-wrap" id="sidebarWrap">
         <div class="sidebar">
             <button class="relogin-btn" id="reloginBtn">🔑 重新登录（切换账号）</button>
-            <div class="report-buttons">
-                <button class="switch-btn active" data-index="0">加盟管理服务中心</button>
-                <button class="switch-btn" data-index="1">早阳门店销售数据</button>
-                <button class="switch-btn" data-index="2">订货物料维度数据</button>
+            <div class="report-buttons" id="reportButtons">
+                <!-- 看板按钮由 JS 根据 DASHBOARDS 配置自动生成，无需手动维护 -->
             </div>
         </div>
         <button class="toggle-side-btn" id="toggleSideBtn">◀</button>
@@ -268,11 +266,11 @@
             <div class="icon">🔐</div>
             <h2>准备切换账号</h2>
             <p>
-                请按以下步骤操作：<br />
-                ① 点击下方按钮打开注销窗口<br />
-                ② 在注销页面点击“注销”或“退出”<br />
-                ③ 看到“您已注销帐户”后，关闭该窗口<br />
-                ④ 回到本页面，点击“关闭页面”按钮<br />
+                请按以下步骤操作：<br>
+                ① 点击下方按钮打开注销窗口<br>
+                ② 在注销页面点击“注销”或“退出”<br>
+                ③ 看到“您已注销帐户”后，关闭该窗口<br>
+                ④ 回到本页面，点击“关闭页面”按钮<br>
                 ⑤ 然后重新打开此页面登录新账号
             </p>
             <div class="btn-group">
@@ -287,17 +285,37 @@
     </div>
 
     <!-- ===== 报表 iframe ===== -->
-    <iframe id="bi-iframe"></iframe>
+    <iframe id="bi-iframe" src="./早阳经营数据_files/reportEmbed.html"></iframe>
 
     <script>
         // ============================================================
         // 1. 配置
         // ============================================================
         const TENANT_ID = "994d48cd-6859-415c-946b-e2424ca28937";
-        const BASE_REPORT_URLS = [
-            `https://app.powerbi.com/reportEmbed?reportId=e3221df2-ffdc-4090-b476-d20a93a2a078&autoAuth=true&ctid=${TENANT_ID}`,
-            `https://app.powerbi.com/reportEmbed?reportId=806ad39f-aa08-49b4-8957-07278cd9cd13&autoAuth=true&ctid=${TENANT_ID}`,
-            `https://app.powerbi.com/reportEmbed?reportId=14bb498b-0172-4cd2-9463-c078a72e464d&autoAuth=true&ctid=${TENANT_ID}`
+
+        // ============================================================
+        // 看板配置 —— 只需在此数组里增删，侧边栏按钮与链接会自动生成
+        //   title : 侧边栏显示的名称
+        //   url   : 看板地址（可写 ${TENANT_ID} 占位符）
+        //   open  : 设为 true 时点击在新标签页打开，而不是嵌入 iframe
+        // ============================================================
+        const DASHBOARDS = [
+            {
+                title: "加盟管理服务中心",
+                url: `https://app.powerbi.com/reportEmbed?reportId=e3221df2-ffdc-4090-b476-d20a93a2a078&autoAuth=true&ctid=${TENANT_ID}`
+            },
+            {
+                title: "早阳门店销售数据",
+                url: `https://app.powerbi.com/reportEmbed?reportId=806ad39f-aa08-49b4-8957-07278cd9cd13&autoAuth=true&ctid=${TENANT_ID}`
+            },
+            {
+                title: "订货物料维度数据",
+                url: `https://app.powerbi.com/reportEmbed?reportId=14bb498b-0172-4cd2-9463-c078a72e464d&autoAuth=true&ctid=${TENANT_ID}`
+            },
+            {
+                title: "早阳门店销售数据v2",
+                url: `https://app.powerbi.com/reportEmbed?reportId=24cd4a8f-e8fa-4cc2-9a6a-3ab0903d0b74&autoAuth=true&ctid=${TENANT_ID}`
+            }
         ];
 
         // ============================================================
@@ -305,7 +323,7 @@
         // ============================================================
         const iframe = document.getElementById("bi-iframe");
         const loading = document.getElementById("loading");
-        const btnList = document.querySelectorAll(".switch-btn");
+        const reportButtons = document.getElementById("reportButtons");
         const sidebarWrap = document.getElementById("sidebarWrap");
         const toggleBtn = document.getElementById("toggleSideBtn");
         const reloginBtn = document.getElementById("reloginBtn");
@@ -315,6 +333,7 @@
         const manualHintBtn = document.getElementById("manualHintBtn");
 
         let currentIndex = 0;
+        let btnList = [];
 
         // ============================================================
         // 3. 侧边栏折叠
@@ -333,28 +352,46 @@
         function hideLoading() { loading.classList.add("hidden"); }
 
         function loadReport(index) {
-            if (index === currentIndex && iframe.src === BASE_REPORT_URLS[index]) return;
+            const dash = DASHBOARDS[index];
+            if (!dash) return;
+            if (index === currentIndex && iframe.src === dash.url) return;
             showLoading();
             currentIndex = index;
-            iframe.src = BASE_REPORT_URLS[index];
+            iframe.src = dash.url;
         }
 
         iframe.onload = () => hideLoading();
         iframe.onerror = () => hideLoading();
 
-        // 初始加载（普通 URL）
-        iframe.src = BASE_REPORT_URLS[0];
-
-        // 切换报表
-        btnList.forEach(btn => {
-            btn.addEventListener("click", () => {
-                const idx = Number(btn.dataset.index);
-                if (idx === currentIndex) return;
-                btnList.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                loadReport(idx);
+        // 根据 DASHBOARDS 自动生成侧边栏按钮
+        function renderButtons() {
+            reportButtons.innerHTML = "";
+            btnList = DASHBOARDS.map((dash, index) => {
+                const btn = document.createElement("button");
+                btn.className = "switch-btn" + (index === 0 ? " active" : "");
+                btn.textContent = dash.title;
+                btn.addEventListener("click", () => {
+                    // 配置为在新标签页打开时，不切换 iframe，直接弹出
+                    if (dash.open) {
+                        window.open(dash.url, "_blank");
+                        return;
+                    }
+                    if (index === currentIndex) return;
+                    btnList.forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    loadReport(index);
+                });
+                reportButtons.appendChild(btn);
+                return btn;
             });
-        });
+        }
+
+        renderButtons();
+
+        // 初始加载第一个看板
+        if (DASHBOARDS[0]) {
+            iframe.src = DASHBOARDS[0].url;
+        }
 
         // ============================================================
         // 5. 超强清除缓存
