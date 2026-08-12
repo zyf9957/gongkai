@@ -56,10 +56,7 @@
     <span class="title">商圈四至查看器</span>
     <select id="districtSelect" style="display:none;"></select>
     <button id="renderAllBtn" style="display:none;">全部</button>
-    <button id="uploadBtn">导入 CSV</button>
-    <button id="keyToggle">密钥</button>
     <span class="spacer"></span>
-    <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none;">
   </div>
 
   <div class="keycard" id="keyCard">
@@ -95,9 +92,8 @@
 
     <div class="hint-overlay" id="hintOverlay">
       <div class="hint-box">
-        <h2>请导入商圈 CSV</h2>
-        <p>本页为「直开四至地图」版：导入包含「空间信息」列（GeoJSON Polygon / MultiPolygon）的表格后，将立即显示第一个商圈的四至范围，并可在左上角下拉切换。<br>也可通过带 <code>?geo=</code> 参数的链接直接打开某个商圈（如飞书深链）。</p>
-        <button id="hintImportBtn">选择 CSV 文件</button>
+        <h2>请通过深链打开</h2>
+        <p>本页为「商圈四至查看器」纯查看版：请用带 <code>?geo=</code> 参数的链接打开（如飞书深链），将直接显示对应商圈的四至范围。<br>如需渲染地图，请在下方填写高德 JS API Key 与安全密钥后点击「加载地图」。</p>
       </div>
     </div>
   </div>
@@ -134,7 +130,6 @@ function loadMap(){
   const key = $('mapApiKey').value.trim();
   const sec = $('securityKey').value.trim();
   if(!key){ setStatus('请先填写高德 JS API Key', 'err'); return; }
-  try{ localStorage.setItem('amap_js_key', key); if(sec) localStorage.setItem('amap_sec_key', sec); }catch(e){}
   $('loadMapBtn').disabled = true; $('loadMapBtn').textContent = '加载中…';
   window._AMapSecurityConfig = { securityJsCode: sec };
   const url = `https://webapi.amap.com/maps?v=2.0&key=${key}&plugin=AMap.Scale,AMap.ToolBar`;
@@ -342,35 +337,16 @@ function setStatus(m, cls){ const e=$('statusBar'); e.textContent=m; e.className
 /* ---------- 事件 ---------- */
 $('loadMapBtn').addEventListener('click', loadMap);
 $('renderAllBtn').addEventListener('click', renderAll);
-$('uploadBtn').addEventListener('click', ()=> $('fileInput').click());
-$('hintImportBtn').addEventListener('click', ()=> $('fileInput').click());
-$('fileInput').addEventListener('change', e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const rd=new FileReader();
-  rd.onload=()=> loadCSVText(rd.result);
-  rd.readAsText(f, 'utf-8');
-});
-$('keyToggle').addEventListener('click', ()=> $('keyCard').classList.toggle('hidden'));
 $('districtSelect').addEventListener('change', e=>{ const i=+e.target.value; if(currentData[i]) renderDistrict(currentData[i]); });
-$('wsApiKey').addEventListener('change', ()=>{ try{ localStorage.setItem('amap_ws_key', $('wsApiKey').value.trim()); }catch(e){} });
 
 /* ---------- 初始化（深链 / 引导导入） ---------- */
-try{
-  const _k = localStorage.getItem('amap_js_key');
-  const _s = localStorage.getItem('amap_sec_key');
-  const _w = localStorage.getItem('amap_ws_key');
-  if(_k) $('mapApiKey').value = _k;
-  if(_s) $('securityKey').value = _s;
-  if(_w) $('wsApiKey').value = _w;
-}catch(e){}
-
 const _params = new URLSearchParams(location.search);
 const _pgeo  = _params.get('geo');
 const _ptitle= _params.get('title');
 const _pkey  = _params.get('key');
 const _psec  = _params.get('sec') || _params.get('security');
-if(_pkey){ $('mapApiKey').value = _pkey; try{ localStorage.setItem('amap_js_key', _pkey); }catch(e){} }
-if(_psec){ $('securityKey').value = _psec; try{ localStorage.setItem('amap_sec_key', _psec); }catch(e){} }
+if(_pkey){ $('mapApiKey').value = _pkey; }
+if(_psec){ $('securityKey').value = _psec; }
 
 let _autoRec = null;
 if(_pgeo){
@@ -381,9 +357,7 @@ if(_pgeo){
 if(_autoRec){
   if(_ptitle) _autoRec.name = _ptitle;
   $('hintOverlay').style.display = 'none';
-  // 深链模式：隐藏导入CSV与密钥切换按钮，保持页面纯净（仅查看四至）
-  $('uploadBtn').style.display = 'none';
-  $('keyToggle').style.display = 'none';
+  // 深链模式：保持页面纯净（仅查看四至）
   if($('mapApiKey').value.trim()){
     $('keyCard').classList.add('hidden');   // 有 Key 则直接隐藏密钥面板，用户无法查看/编辑
     loadMap();
